@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: theme('colors.brand.cream');
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Subtle paper grain / warmth for the cream background sections. */
+.bg-paper {
+  background-color: #f9f5ec;
+  background-image:
+    radial-gradient(
+      circle at 20% 10%,
+      rgba(255, 57, 46, 0.05),
+      transparent 45%
+    ),
+    radial-gradient(circle at 90% 0%, rgba(51, 50, 126, 0.06), transparent 40%);
+}
+
+/* The hero gradient text treatment. */
+.text-gradient-brand {
+  background-image: linear-gradient(110deg, #ff392e 10%, #f36e0a 55%, #f79605);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/*
+ * Redaction box rendering used in the visual guide and result overlays. The
+ * `.leaky` variant mimics a redaction that didn't actually remove the text:
+ * hover to reveal what was "underneath".
+ */
+.redaction-box {
+  background-color: #16151c;
+  color: #16151c;
+  border-radius: 2px;
+  padding: 0 0.15em;
+  transition:
+    color 0.25s ease,
+    background-color 0.25s ease;
+}
+
+.redaction-box.leaky:hover,
+.redaction-box.leaky:focus-visible {
+  background-color: transparent;
+  color: #16151c;
+  outline: 2px dashed #ff392e;
+  outline-offset: 1px;
+}
+
+/* Skeleton shimmer for the analysis progress state. */
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.55),
+    transparent
+  );
+  animation: shimmer 1.6s infinite;
+}
+
+/* Respect users who prefer reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

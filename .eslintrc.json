@@ -1,0 +1,13 @@
+{
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:prettier/recommended"
+  ],
+  "plugins": ["unused-imports"],
+  "rules": {
+    "spaced-comment": ["error", "always"],
+    "unused-imports/no-unused-imports": "error",
+    "no-unused-vars": "off",
+    "react-hooks/exhaustive-deps": "off"
+  }
+}

@@ -80,9 +80,27 @@ Other scripts:
 npm run build      # production build (also copies pdf.js assets to /public)
 npm run typecheck  # tsc --noEmit
 npm run format     # prettier --write + eslint --fix
-node scripts/make-sample-pdf.mjs            # regenerate the demo "leaky" PDF
-npx tsx scripts/verify-analyzer.mts         # Node sanity check of the analyzer
+npm run examples   # regenerate the example PDFs + manifest in examples/
+node scripts/make-sample-pdf.mjs            # regenerate the in-app demo "leaky" PDF
 ```
+
+## Tests
+
+Two layers, both driven by the documents in [`examples/`](./examples):
+
+```bash
+npm test           # Vitest: runs the real analyzer over every example PDF and
+                   #   asserts the expected checks/grade/recovered text — plus a
+                   #   clean-control fixture that must produce zero findings.
+npm run test:e2e   # Playwright: uploads example PDFs through the real UI and
+                   #   asserts the alerts render and the strict CSP isn't tripped.
+```
+
+The Vitest suite runs the actual `extract` → `checks` → `grade` modules against
+each fixture via pdf.js's Node build, so it tests the shipping detection logic
+(not a reimplementation). The Playwright suite uses your local Google Chrome
+(`channel: 'chrome'`); in CI without Chrome, run `npx playwright install
+chromium` and drop the `channel` in `playwright.config.ts`.
 
 The pdf.js worker, standard fonts, and CMaps are copied out of `node_modules`
 into `/public` at build time by `scripts/copy-pdfjs.mjs` (kept out of git).

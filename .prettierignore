@@ -3,3 +3,7 @@ node_modules
 public
 *.md
 package-lock.json
+# generated data
+src/data/wordlist.json
+examples/manifest.json
+examples/*.pdf

@@ -34,3 +34,8 @@ yarn-error.log*
 /public/pdf.worker.min.mjs
 /public/pdfjs/
 
+# test artifacts
+/test-results/
+/playwright-report/
+/coverage/
+

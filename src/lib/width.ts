@@ -74,13 +74,17 @@ function tolerance(boxWidthPt: number): number {
 }
 
 /**
- * Confidence (0..1) that a width fits the box. Forgiving curve: a near-exact
- * fit reads ~100% and it falls off quadratically to 0 at the tolerance edge. A
- * plain linear `1 - err/tol` over a tight band made even the *correct* word read
- * ~60%, which is misleading — the width really did fit.
+ * Confidence (0..1) that a width fits the box. We estimate width with a generic
+ * browser font (the document's real font is never loaded, by design) rescaled
+ * from a sample, so the honest precision is ~1–2pt on a short word — and boxes
+ * carry a little padding. Differences within that measurement-noise FLOOR are
+ * unresolvable, so they read as a full-width match (the correct word lands at
+ * ~100%, not an arbitrary 94%). Past the floor, confidence falls off
+ * quadratically to 0 at the tolerance edge.
  */
 function confidenceFor(absErr: number, tol: number): number {
-  const r = absErr / tol
+  const floor = Math.min(2, tol * 0.4)
+  const r = Math.max(0, absErr - floor) / (tol - floor)
   return r >= 1 ? 0 : 1 - r * r
 }
 

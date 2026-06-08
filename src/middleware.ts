@@ -15,13 +15,23 @@ import {NextRequest, NextResponse} from 'next/server'
  */
 export function middleware(request: NextRequest) {
   const nonce = btoa(crypto.randomUUID())
+  const isDev = process.env.NODE_ENV !== 'production'
+
+  // In production we ship a strict, nonce-based policy. In development, Next.js
+  // Fast Refresh (react-refresh) evaluates strings as JS and injects inline
+  // bootstrap scripts, which a nonce/`strict-dynamic` policy without
+  // `'unsafe-eval'` blocks — that EvalError aborts hydration and makes the whole
+  // page non-interactive. So dev gets a relaxed script policy; prod is untouched.
+  const scriptSrc = isDev
+    ? `script-src 'self' 'unsafe-eval' 'unsafe-inline'`
+    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'wasm-unsafe-eval'`
 
   const csp = [
     `default-src 'self'`,
     // `strict-dynamic` lets the nonced bootstrap script load the rest; `'self'`
     // is the fallback for browsers that ignore strict-dynamic. `wasm-unsafe-eval`
     // allows pdf.js image decoders to use WebAssembly without enabling eval().
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'wasm-unsafe-eval'`,
+    scriptSrc,
     // Inline styles are needed for dynamically positioned redaction overlays and
     // Next/DaisyUI runtime styles. `'unsafe-inline'` for styles can in principle
     // be a CSS side channel, but the destinations one would use are all closed:

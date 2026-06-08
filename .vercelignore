@@ -1,0 +1,11 @@
+# Nothing here is needed to build or run the deployed app (the app lives in
+# src/ and serves public/). Excluding these keeps the local-only, never-committed
+# real-world example PDFs (examples/real-world/*.pdf) off Vercel's servers, and
+# trims the upload.
+examples/
+tests/
+e2e/
+playwright.config.ts
+test-results/
+playwright-report/
+coverage/

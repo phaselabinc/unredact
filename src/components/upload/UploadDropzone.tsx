@@ -84,7 +84,7 @@ export function UploadDropzone({
           Drop a PDF here, or click to choose one
         </p>
         <p className="mt-1 max-w-sm text-sm text-brand-ink/60">
-          We’ll scan it for failed redactions right here in your browser.
+          We’ll scan it for failed redactions on the spot.
         </p>
         <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-brand-blue/10 px-3 py-1 text-xs font-medium text-brand-blue">
           <FiLock className="h-3 w-3" /> Nothing is uploaded — analysis runs on

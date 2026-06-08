@@ -1,8 +1,10 @@
 'use client'
 
 import {useState} from 'react'
-import {FiMenu, FiX, FiShield} from 'react-icons/fi'
+import {FiMenu, FiX} from 'react-icons/fi'
 import {Logo} from './Logo'
+
+const DEMO_URL = 'https://www.phase.law/get-started'
 
 const NAV_LINKS = [
   {href: '#how-redactions-fail', label: 'How redactions fail'},
@@ -33,6 +35,14 @@ export function SiteHeader() {
               {link.label}
             </a>
           ))}
+          <a
+            href={DEMO_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-outline btn-sm rounded-xl border-brand-ink/15 normal-case hover:border-brand-ink hover:bg-brand-ink hover:text-brand-cream"
+          >
+            Book a demo
+          </a>
           <a
             href="#try-it"
             className="btn btn-primary btn-sm rounded-xl normal-case shadow-sm"
@@ -66,6 +76,15 @@ export function SiteHeader() {
               </a>
             ))}
             <a
+              href={DEMO_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setOpen(false)}
+              className="btn btn-outline btn-sm mt-1 rounded-xl border-brand-ink/15 normal-case"
+            >
+              Book a demo
+            </a>
+            <a
               href="#try-it"
               onClick={() => setOpen(false)}
               className="btn btn-primary btn-sm mt-1 rounded-xl normal-case"
@@ -75,14 +94,6 @@ export function SiteHeader() {
           </nav>
         </div>
       )}
-
-      <div className="flex items-center justify-center gap-1.5 bg-brand-blue px-4 py-1 text-center text-[0.7rem] font-medium text-brand-cream">
-        <FiShield className="h-3 w-3 shrink-0" />
-        <span>
-          100% in your browser. Your document is never uploaded, stored, or seen
-          by anyone — including us.
-        </span>
-      </div>
     </header>
   )
 }

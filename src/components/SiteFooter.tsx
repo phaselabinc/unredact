@@ -1,4 +1,4 @@
-import {FiGithub, FiExternalLink} from 'react-icons/fi'
+import {FiExternalLink} from 'react-icons/fi'
 import {BrandGlyph} from './Logo'
 
 export function SiteFooter() {
@@ -25,6 +25,14 @@ export function SiteFooter() {
               teams redact documents the right way — so the black box actually
               means something.
             </p>
+            <a
+              href="https://www.phase.law/get-started"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-primary btn-sm mt-5 rounded-xl normal-case"
+            >
+              Book a demo
+            </a>
           </div>
 
           <div className="grid grid-cols-2 gap-8 text-sm">
@@ -67,7 +75,7 @@ export function SiteFooter() {
                 <li>
                   <a
                     className="inline-flex items-center gap-1 text-brand-cream/80 hover:text-brand-cream"
-                    href="https://phase.law"
+                    href="https://www.phase.law"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -77,11 +85,21 @@ export function SiteFooter() {
                 <li>
                   <a
                     className="inline-flex items-center gap-1 text-brand-cream/80 hover:text-brand-cream"
-                    href="https://github.com/phaselab"
+                    href="https://www.phase.law/product"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <FiGithub className="h-3 w-3" /> GitHub
+                    Product <FiExternalLink className="h-3 w-3" />
+                  </a>
+                </li>
+                <li>
+                  <a
+                    className="inline-flex items-center gap-1 text-brand-cream/80 hover:text-brand-cream"
+                    href="https://www.phase.law/get-started"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Book a demo <FiExternalLink className="h-3 w-3" />
                   </a>
                 </li>
               </ul>

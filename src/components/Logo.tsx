@@ -24,11 +24,10 @@ export function Logo({className}: {className?: string}) {
   return (
     <span className={`inline-flex items-center gap-2.5 ${className ?? ''}`}>
       <BrandGlyph className="h-7 w-7 text-brand-vermillion" />
-      <span className="text-xl font-bold tracking-tight">
-        unredact
-        <span className="align-super text-[0.6rem] font-medium text-brand-vermillion">
-          {' '}
-          beta
+      <span className="flex items-baseline gap-1.5 leading-none">
+        <span className="text-xl font-bold tracking-tight">unredact</span>
+        <span className="text-sm font-medium text-brand-ink/50">
+          by phaselaw
         </span>
       </span>
     </span>

@@ -1,5 +1,24 @@
 import {FiArrowDown, FiShield} from 'react-icons/fi'
 
+/**
+ * A word with a *failed* redaction over it — a hastily-drawn black bar that's
+ * translucent and skewed, so the word reads right through it. The real text
+ * stays selectable (it's an h1), and on hover the bar slides + fades, like a
+ * redaction giving up its secret the moment you look. The whole product, in one
+ * word.
+ */
+function FailedRedaction({children}: {children: string}) {
+  return (
+    <span className="group relative inline-block whitespace-nowrap">
+      <span className="relative z-10">{children}</span>
+      <span
+        aria-hidden="true"
+        className="absolute -inset-x-2 inset-y-[0.12em] z-20 -rotate-[1.5deg] rounded-[3px] bg-brand-ink/75 shadow-[0_1px_2px_rgba(0,0,0,0.25)] transition-all duration-500 ease-out group-hover:translate-x-[0.5em] group-hover:rotate-[0.5deg] group-hover:bg-brand-ink/20"
+      />
+    </span>
+  )
+}
+
 export function Hero() {
   return (
     <section
@@ -9,7 +28,7 @@ export function Hero() {
       <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
         <div className="mx-auto max-w-3xl text-center">
           <h1 className="font-display text-4xl font-bold leading-[1.1] tracking-tight sm:text-6xl">
-            Is your redaction{' '}
+            Is your <FailedRedaction>redaction</FailedRedaction>{' '}
             <span className="text-gradient-brand">actually safe?</span>
           </h1>
 

@@ -43,12 +43,6 @@ export function SiteHeader() {
           >
             Book a demo
           </a>
-          <a
-            href="#try-it"
-            className="btn btn-primary btn-sm rounded-xl normal-case shadow-sm"
-          >
-            Check a PDF
-          </a>
         </nav>
 
         <button
@@ -83,13 +77,6 @@ export function SiteHeader() {
               className="btn btn-outline btn-sm mt-1 rounded-xl border-brand-ink/15 normal-case"
             >
               Book a demo
-            </a>
-            <a
-              href="#try-it"
-              onClick={() => setOpen(false)}
-              className="btn btn-primary btn-sm mt-1 rounded-xl normal-case"
-            >
-              Check a PDF
             </a>
           </nav>
         </div>

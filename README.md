@@ -104,21 +104,27 @@ chromium` and drop the `channel` in `playwright.config.ts`.
 
 ### Real-world documents
 
-`npm run examples:real` downloads real DoJ-released court documents with
-*documented* defective redactions (currently Exhibit 1 of the USVI v. JPMorgan
-complaint, which the [PDF Association](https://pdfa.org/a-case-study-in-pdf-forensics-the-epstein-pdfs/)
-flagged for a failed redaction on page 41 — our analyzer scores it **F** and
-recovers text from 70+ black boxes). They are fetched into `examples/real/`
-(gitignored) and verified by SHA-256.
+`npm run examples:real` downloads a private set of **famous, publicly-documented
+redaction failures** and runs them through the shipping analyzer. The current
+corpus and a results table live in
+[`examples/real-world/`](./examples/real-world/README.md):
+
+| Document | Year | Our grade |
+| --- | --- | --- |
+| TSA Screening Management SOP | 2009 | **F** (superficial ×25 + metadata + bookmark + word-size) |
+| Manafort response (*US v. Manafort*) | 2019 | **F** (superficial ×32, incl. the p.5 polling-data passage) |
+| USVI v. JPMorgan, Exhibit 1 (DoJ Epstein release) | 2022 | **F** (superficial ×71, incl. p.41, + metadata) |
+| EU–AstraZeneca contract *(true-negative control)* | 2021 | **A** (correctly clean) |
 
 These PDFs are **never committed**: they contain the very content their failed
 redactions exposed, and storing improperly-disclosed third-party data in the
-repo would be exactly the mistake this tool exists to catch. Only a PII-free
-reference manifest (`examples/real-manifest.json`: source URL + hash + expected
-counts) is tracked. `tests/real-examples.test.ts` asserts on these when present
-and skips them when absent. Note the main Dec-2025 EFTA release (Datasets 01–07)
-was *correctly* redacted per the PDF Association; the genuine failures are in
-older court-record releases like this one.
+repo would be exactly the mistake this tool exists to catch. They are fetched
+into `examples/real-world/` (gitignored) and verified by SHA-256; only the
+PII-free [`manifest.json`](./examples/real-world/manifest.json) (source URL +
+hash + expected counts) is tracked. `tests/real-examples.test.ts` asserts on each
+when present and skips it when absent. Note the main Dec-2025 EFTA Epstein
+release (Datasets 01–07) was *correctly* redacted per the PDF Association; the
+genuine failures are in older court exhibits like the JPMorgan one.
 
 The pdf.js worker, standard fonts, and CMaps are copied out of `node_modules`
 into `/public` at build time by `scripts/copy-pdfjs.mjs` (kept out of git).

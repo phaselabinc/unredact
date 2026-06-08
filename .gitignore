@@ -40,5 +40,6 @@ yarn-error.log*
 /coverage/
 
 
-# real DoJ example PDFs are downloaded on demand, never committed
-/examples/real/
+# real-world example PDFs are downloaded on demand, never committed
+# (only examples/real-world/{manifest.json,fetch.mjs,README.md} are tracked)
+/examples/real-world/*.pdf

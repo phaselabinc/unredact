@@ -1,0 +1,78 @@
+{
+  "note": "Famous, publicly-documented real-world redaction failures, used as regression cases against the shipping analyzer. The PDFs are fetched on demand (npm run examples:real) into this directory and are NEVER committed: they contain the very content their failed redactions exposed, and we are a redaction/DSAR company, so storing improperly-disclosed third-party data in the repo is exactly the mistake this tool exists to catch. Only this PII-free manifest (source URL + SHA-256 + expected counts) is tracked. tests/real-examples.test.ts asserts on each entry when its file is present and skips it when absent. A results table for humans lives in README.md.",
+  "files": [
+    {
+      "file": "tsa-screening-sop-2008.pdf",
+      "kind": "failure",
+      "title": "TSA Screening Management Standard Operating Procedures (rev. 3, May 2008)",
+      "case": "Transportation Security Administration; posted to FedBizOpps.gov, 2009",
+      "year": 2009,
+      "source": "https://cryptome.org/2013/01/tsa-screening-mgmt-sop.pdf",
+      "reportedBy": "Schneier on Security; The Register; Wired — the textbook 'black box over live text' government leak",
+      "failure": "93-page manual where redacted passages were covered with black rectangles but never removed; copy-paste reveals screening thresholds and procedures. Document Title metadata and a PDF bookmark also leak.",
+      "sha256": "9ca6e9fcf134593bc1259d358776ec69a3605c68a00ab40e92e3929539a21331",
+      "expect": {
+        "grade": "F",
+        "checks": ["superficial-mark", "metadata-leak", "outline-leak"],
+        "minLeaks": 20,
+        "metadataLeak": true,
+        "leakOnPages": [9, 38, 44]
+      }
+    },
+    {
+      "file": "manafort-response-2019.pdf",
+      "kind": "failure",
+      "title": "Defendant Paul J. Manafort Jr.'s Response to the Special Counsel's Submission",
+      "case": "United States v. Manafort, 1:17-cr-00201 (D.D.C.), filed 2019-01-08",
+      "year": 2019,
+      "source": "https://assets.documentcloud.org/documents/5677512/Manafort-20190108-Dc.pdf",
+      "reportedBy": "The Guardian; Vice Motherboard — reporters copy-pasted the blacked-out passage",
+      "failure": "Defense drew black boxes over the passage describing Manafort sharing 2016 campaign polling data with Konstantin Kilimnik (page 5); the text underneath was never removed.",
+      "sha256": "7e21c26404618d30b768caf55dfeff5e7b31c651595c55d41a91f54c8852ece0",
+      "expect": {
+        "grade": "F",
+        "checks": ["superficial-mark"],
+        "minLeaks": 25,
+        "metadataLeak": false,
+        "leakOnPages": [5]
+      }
+    },
+    {
+      "file": "jpmorgan-complaint-exhibit-1.pdf",
+      "kind": "failure",
+      "title": "USVI v. JPMorgan Chase — Exhibit 1 to the Complaint",
+      "case": "Gov't of the U.S. Virgin Islands v. JPMorgan Chase, 1:22-cv-10904-JSR (S.D.N.Y. 2022)",
+      "year": 2022,
+      "source": "https://storage.courtlistener.com/recap/gov.uscourts.nysd.591653/gov.uscourts.nysd.591653.1.1.pdf",
+      "canonical": "https://www.justice.gov/multimedia/Court Records/Government of the United States Virgin Islands v. JPMorgan Chase Bank, N.A., No. 122-cv-10904 (S.D.N.Y. 2022)/001-01.pdf",
+      "reportedBy": "PDF Association — 'A case study in PDF forensics: The Epstein PDFs' (flags defective redaction on page 41)",
+      "failure": "DoJ-released court exhibit with failed redactions; the PDF Association flagged page 41, and copy-paste recovers text under marks on many pages. Document Title metadata also leaks.",
+      "sha256": "9ff93e1d34ee0fbb8690225da6606ebd806d5f638d7d4d1dc7b26009e7cf48f5",
+      "expect": {
+        "grade": "F",
+        "checks": ["superficial-mark", "metadata-leak"],
+        "minLeaks": 50,
+        "metadataLeak": true,
+        "leakOnPages": [41]
+      }
+    },
+    {
+      "file": "astrazeneca-eu-contract-2021.pdf",
+      "kind": "control",
+      "title": "EU–AstraZeneca COVID-19 Advance Purchase Agreement (redacted, corrected reissue)",
+      "case": "European Commission; first published 2021-01-29",
+      "year": 2021,
+      "source": "https://web.archive.org/web/20210429051427id_/https://ec.europa.eu/info/sites/default/files/apa_astrazeneca.pdf",
+      "reportedBy": "The Register; PDF Association — the original leaked redacted section titles via the PDF Bookmarks tab",
+      "failure": "TRUE-NEGATIVE CONTROL. The infamous first-publication copy leaked redacted section titles through PDF bookmarks, but it was online for only hours and was never archived. Wayback's earliest capture (this file) is the corrected reissue, which is properly redacted — so the famous defect is not present here. Kept as a real, famous, properly-redacted government contract that the analyzer must NOT false-positive on.",
+      "sha256": "08be8ba71d9fd7b9adcdcf02d00bfd58910f4a02e8541989ffbe977d0c7a0ccd",
+      "expect": {
+        "grade": "A",
+        "checks": [],
+        "minLeaks": 0,
+        "metadataLeak": false,
+        "leakOnPages": []
+      }
+    }
+  ]
+}

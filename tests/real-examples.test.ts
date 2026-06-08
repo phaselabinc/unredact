@@ -3,11 +3,13 @@ import {existsSync, readFileSync} from 'node:fs'
 import {fileURLToPath} from 'node:url'
 import {analyzeBuffer} from './helpers/analyzeNode'
 
-const examplesDir = fileURLToPath(new URL('../examples', import.meta.url))
-const realDir = `${examplesDir}/real`
+const realDir = fileURLToPath(
+  new URL('../examples/real-world', import.meta.url)
+)
 
 interface RealEntry {
   file: string
+  kind: 'failure' | 'control'
   title: string
   case: string
   expect: {
@@ -20,23 +22,31 @@ interface RealEntry {
 }
 
 const manifest: {files: RealEntry[]} = JSON.parse(
-  readFileSync(`${examplesDir}/real-manifest.json`, 'utf8')
+  readFileSync(`${realDir}/manifest.json`, 'utf8')
 )
 
-// These real DoJ court PDFs are fetched on demand (npm run examples:real) and
+// These famous real-world PDFs are fetched on demand (npm run examples:real) and
 // never committed. Each case runs only when its file is present locally, and is
 // skipped otherwise so the suite stays green without the (sensitive) documents.
-describe('real-world DoJ documents (run after `npm run examples:real`)', () => {
+describe('real-world redaction failures (run after `npm run examples:real`)', () => {
   for (const entry of manifest.files) {
     const path = `${realDir}/${entry.file}`
-    const present = existsSync(path)
-    const run = present ? it : it.skip
+    const run = existsSync(path) ? it : it.skip
 
     run(`${entry.file} — ${entry.title}`, async () => {
       const data = new Uint8Array(readFileSync(path))
       const {findings, summary} = await analyzeBuffer(data)
 
       expect(summary.grade).toBe(entry.expect.grade)
+
+      if (entry.kind === 'control') {
+        // A properly-redacted real document must not trip any check.
+        expect(summary.checksTriggered).toEqual([])
+        expect(summary.leakCount).toBe(0)
+        expect(summary.metadataLeak).toBe(false)
+        return
+      }
+
       for (const check of entry.expect.checks) {
         expect(summary.checksTriggered).toContain(check)
       }

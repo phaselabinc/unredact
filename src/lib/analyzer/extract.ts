@@ -5,9 +5,10 @@ import {
   MAX_OPS_PER_PAGE,
   MAX_TEXT_ITEMS_PER_PAGE,
   MIN_COVER_AREA,
+  MIN_COVER_THICKNESS_PT,
 } from './constants'
 import {cmykToRgb, grayToRgb, isDark, type RGB} from './color'
-import {area, normalize} from './geometry'
+import {area, height, normalize, width} from './geometry'
 
 type Pdfjs = typeof import('pdfjs-dist')
 
@@ -304,10 +305,22 @@ async function extractCovers(
     }
   }
 
-  // Drop hairlines and full-page backgrounds (a redaction is neither).
+  // Drop full-page backgrounds and anything too small or too THIN to be a
+  // redaction. The area test alone misses long-but-thin drawn rules (a vertical
+  // change bar or a title underline has plenty of area), so screen path fills
+  // for thickness in both dimensions too — they hide a block of text only if
+  // they have real extent both ways. Annotations are explicit redaction objects,
+  // so only drawn path fills are thickness-screened.
   const filtered = covers.filter((c) => {
     const a = area(c.bbox)
-    return a >= MIN_COVER_AREA && a <= 0.6 * pageArea
+    if (a < MIN_COVER_AREA || a > 0.6 * pageArea) return false
+    if (
+      c.kind === 'path-fill' &&
+      Math.min(width(c.bbox), height(c.bbox)) < MIN_COVER_THICKNESS_PT
+    ) {
+      return false
+    }
+    return true
   })
   return {covers: filtered, hasLargeImage}
 }

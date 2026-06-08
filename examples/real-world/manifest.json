@@ -32,7 +32,7 @@
       "expect": {
         "grade": "F",
         "checks": ["superficial-mark"],
-        "minLeaks": 25,
+        "minLeaks": 18,
         "metadataLeak": false,
         "leakOnPages": [5]
       }

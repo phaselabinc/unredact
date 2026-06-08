@@ -41,5 +41,14 @@ export const MIN_COVERAGE = 0.6
 /** Minimum cover area (viewport units²) to bother with — ignores hairlines. */
 export const MIN_COVER_AREA = 12
 
+/**
+ * Minimum thickness (pt) of a drawn path-fill in BOTH dimensions for it to count
+ * as a redaction box. A real "black box" hides a block of text, so it has real
+ * extent both ways; thin rules do not. Without this, long-but-thin fills slip
+ * past the area filter and get mis-flagged as covered text: vertical change bars
+ * (tiny width) and title/header underlines (tiny height) hide nothing.
+ */
+export const MIN_COVER_THICKNESS_PT = 3
+
 /** Magic bytes every PDF must start with: "%PDF-". */
 export const PDF_MAGIC = [0x25, 0x50, 0x44, 0x46, 0x2d]

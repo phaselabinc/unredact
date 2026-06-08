@@ -1,4 +1,4 @@
-import {FiArrowDown, FiShield, FiZap} from 'react-icons/fi'
+import {FiArrowDown, FiShield} from 'react-icons/fi'
 
 export function Hero() {
   return (
@@ -8,12 +8,7 @@ export function Hero() {
     >
       <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
         <div className="mx-auto max-w-3xl text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-brand-almond bg-white/70 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-brand-ink/60">
-            <FiZap className="h-3.5 w-3.5 text-brand-vermillion" /> An
-            experiment from phaselaw
-          </span>
-
-          <h1 className="mt-6 font-display text-4xl font-bold leading-[1.1] tracking-tight sm:text-6xl">
+          <h1 className="font-display text-4xl font-bold leading-[1.1] tracking-tight sm:text-6xl">
             Is your redaction{' '}
             <span className="text-gradient-brand">actually safe?</span>
           </h1>

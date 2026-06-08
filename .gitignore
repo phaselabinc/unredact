@@ -39,3 +39,6 @@ yarn-error.log*
 /playwright-report/
 /coverage/
 
+
+# real DoJ example PDFs are downloaded on demand, never committed
+/examples/real/

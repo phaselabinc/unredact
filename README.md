@@ -102,6 +102,24 @@ each fixture via pdf.js's Node build, so it tests the shipping detection logic
 (`channel: 'chrome'`); in CI without Chrome, run `npx playwright install
 chromium` and drop the `channel` in `playwright.config.ts`.
 
+### Real-world documents
+
+`npm run examples:real` downloads real DoJ-released court documents with
+*documented* defective redactions (currently Exhibit 1 of the USVI v. JPMorgan
+complaint, which the [PDF Association](https://pdfa.org/a-case-study-in-pdf-forensics-the-epstein-pdfs/)
+flagged for a failed redaction on page 41 — our analyzer scores it **F** and
+recovers text from 70+ black boxes). They are fetched into `examples/real/`
+(gitignored) and verified by SHA-256.
+
+These PDFs are **never committed**: they contain the very content their failed
+redactions exposed, and storing improperly-disclosed third-party data in the
+repo would be exactly the mistake this tool exists to catch. Only a PII-free
+reference manifest (`examples/real-manifest.json`: source URL + hash + expected
+counts) is tracked. `tests/real-examples.test.ts` asserts on these when present
+and skips them when absent. Note the main Dec-2025 EFTA release (Datasets 01–07)
+was *correctly* redacted per the PDF Association; the genuine failures are in
+older court-record releases like this one.
+
 The pdf.js worker, standard fonts, and CMaps are copied out of `node_modules`
 into `/public` at build time by `scripts/copy-pdfjs.mjs` (kept out of git).
 

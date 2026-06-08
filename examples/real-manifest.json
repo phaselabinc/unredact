@@ -1,0 +1,21 @@
+{
+  "note": "Real DoJ-released court documents with documented, defective redactions. The PDFs themselves are NOT committed — they contain the very content their failed redactions exposed, and we are a redaction/DSAR company, so we don't store improperly-disclosed third-party data in the repo. Fetch them on demand into examples/real/ (gitignored) with `npm run examples:real`; integrity is checked by SHA-256. tests/real-examples.test.ts asserts on these when present and skips when absent.",
+  "files": [
+    {
+      "file": "jpmorgan-complaint-exhibit-1.pdf",
+      "title": "USVI v. JPMorgan Chase — Exhibit 1 to the Complaint",
+      "case": "1:22-cv-10904-JSR (S.D.N.Y. 2022)",
+      "source": "https://storage.courtlistener.com/recap/gov.uscourts.nysd.591653/gov.uscourts.nysd.591653.1.1.pdf",
+      "canonical": "https://www.justice.gov/multimedia/Court Records/Government of the United States Virgin Islands v. JPMorgan Chase Bank, N.A., No. 122-cv-10904 (S.D.N.Y. 2022)/001-01.pdf",
+      "reportedBy": "PDF Association — 'A case study in PDF forensics: The Epstein PDFs' (flags defective redaction on page 41)",
+      "sha256": "9ff93e1d34ee0fbb8690225da6606ebd806d5f638d7d4d1dc7b26009e7cf48f5",
+      "expect": {
+        "grade": "F",
+        "checks": ["superficial-mark", "metadata-leak"],
+        "minLeaks": 20,
+        "metadataLeak": true,
+        "leakOnPages": [41]
+      }
+    }
+  ]
+}

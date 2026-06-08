@@ -63,8 +63,25 @@ export interface GuessScore {
   verdict: 'too-short' | 'too-long' | 'plausible' | 'strong'
 }
 
+/**
+ * Tolerance band (pt) for "does this width fit the box". Generous on purpose:
+ * we estimate width with a generic browser font calibrated from a sample, and
+ * redaction boxes carry padding — so the honest precision here is ~10–15%, not
+ * a few points.
+ */
 function tolerance(boxWidthPt: number): number {
-  return Math.max(2.5, boxWidthPt * 0.08)
+  return Math.max(4, boxWidthPt * 0.15)
+}
+
+/**
+ * Confidence (0..1) that a width fits the box. Forgiving curve: a near-exact
+ * fit reads ~100% and it falls off quadratically to 0 at the tolerance edge. A
+ * plain linear `1 - err/tol` over a tight band made even the *correct* word read
+ * ~60%, which is misleading — the width really did fit.
+ */
+function confidenceFor(absErr: number, tol: number): number {
+  const r = absErr / tol
+  return r >= 1 ? 0 : 1 - r * r
 }
 
 /** Score how well a user-typed guess matches the redaction box width. */
@@ -74,11 +91,11 @@ export function scoreGuess(guess: string, w: WidthAnalysis): GuessScore {
   const errorPt = estWidthPt - w.boxWidthPt
   const tol = tolerance(w.boxWidthPt)
   const absErr = Math.abs(errorPt)
-  const confidence = Math.max(0, 1 - absErr / tol)
+  const confidence = confidenceFor(absErr, tol)
   let verdict: GuessScore['verdict']
   if (errorPt < -tol) verdict = 'too-short'
   else if (errorPt > tol) verdict = 'too-long'
-  else if (absErr < tol * 0.35) verdict = 'strong'
+  else if (absErr < tol * 0.4) verdict = 'strong'
   else verdict = 'plausible'
   return {
     estWidthPt,
@@ -155,7 +172,7 @@ export async function rankCandidates(
     scored.push({
       word,
       estWidthPt,
-      confidence: Math.max(0, 1 - absErr / tol),
+      confidence: confidenceFor(absErr, tol),
       source,
     })
   }

@@ -78,7 +78,7 @@ export const GRADE_META: Record<RedactionGrade, GradeMeta> = {
   B: {
     label: 'Mostly fine',
     blurb:
-      'Nothing recoverable, but a structural detail could hint at content.',
+      'Nothing recoverable — but a box’s width or a leftover bookmark can still hint at what’s hidden.',
     ring: 'text-lime-500',
     bg: 'bg-lime-500',
   },
@@ -89,8 +89,9 @@ export const GRADE_META: Record<RedactionGrade, GradeMeta> = {
     bg: 'bg-amber-500',
   },
   D: {
-    label: 'Risky redactions',
-    blurb: 'No text recovered, but the box sizes give away what they hide.',
+    label: 'Removable redactions',
+    blurb:
+      'No text recovered, but a redaction mark here lifts right off — delete it and the content comes back.',
     ring: 'text-orange-500',
     bg: 'bg-orange-500',
   },

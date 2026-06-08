@@ -15,7 +15,7 @@
   {
     "file": "02-word-size-leak.pdf",
     "title": "Box width leaks the hidden length",
-    "grade": "D",
+    "grade": "B",
     "expectChecks": [
       "word-size"
     ],

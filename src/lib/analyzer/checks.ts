@@ -1,7 +1,13 @@
-import type {Cover, PageExtract, TextRun, DocMetaLeak} from './extract'
+import type {
+  Cover,
+  PageExtract,
+  TextMark,
+  TextRun,
+  DocMetaLeak,
+} from './extract'
 import type {BBox, CheckId, CoverKind, Finding, WidthAnalysis} from './types'
-import {MIN_COVERAGE} from './constants'
-import {height, intersection, sameLine, width} from './geometry'
+import {LABEL_RUN_COVERAGE, MIN_COVERAGE} from './constants'
+import {coverage, height, intersection, sameLine, width} from './geometry'
 
 /**
  * pdf.js merges adjacent glyphs into long line-runs, so a redaction box usually
@@ -69,7 +75,7 @@ function describeLeak(
       return {
         title: 'Removable redaction mark',
         detail:
-          'This black box is an annotation sitting on top of the page, not part of it. Anyone can drag it off — or just copy the text straight out from underneath.',
+          'This black box is an annotation sitting on top of the page, not part of it. Anyone can drag it off, or just copy the text straight out from underneath.',
       }
     case 'ocr-layer-leak':
       return {
@@ -183,6 +189,41 @@ function distToBox(a: BBox, b: BBox): number {
   return Math.abs(ax - bx)
 }
 
+/**
+ * Some redaction tools stamp the exemption reason in light text ON TOP of each
+ * applied redaction box. That text is the opposite of hidden — it was painted
+ * after the box, in a colour chosen to read against it — so reporting it as a
+ * leak is wrong. A run is the visible label when the light marks drawn over
+ * this cover tile most of the run's extent inside the box. Text hidden UNDER
+ * the box keeps its own (earlier, darker) marks and is never excused; the
+ * marks here were pre-filtered to light fills painted after this cover.
+ */
+function isVisibleLabelRun(
+  run: TextRun,
+  coverBox: BBox,
+  labelMarks: TextMark[]
+): boolean {
+  const clip = intersection(run.bbox, coverBox)
+  if (!clip) return false
+  const ivs: Array<[number, number]> = []
+  for (const m of labelMarks) {
+    if (!sameLine(m.bbox, run.bbox)) continue
+    const s = Math.max(m.bbox[0], clip[0])
+    const e = Math.min(m.bbox[2], clip[2])
+    if (e > s) ivs.push([s, e])
+  }
+  if (ivs.length === 0) return false
+  ivs.sort((a, b) => a[0] - b[0])
+  let covered = 0
+  let curEnd = -Infinity
+  for (const [s, e] of ivs) {
+    const start = Math.max(s, curEnd)
+    if (e > start) covered += e - start
+    curEnd = Math.max(curEnd, e)
+  }
+  return covered / width(clip) >= LABEL_RUN_COVERAGE
+}
+
 /** Run the per-page covers/text checks (1, 2, 3, 5). */
 export function checkPage(extract: PageExtract, deadline?: number): Finding[] {
   const findings: Finding[] = []
@@ -195,8 +236,20 @@ export function checkPage(extract: PageExtract, deadline?: number): Finding[] {
     if (deadline && (i++ & 31) === 0 && Date.now() > deadline) break
 
     const coverW = width(cover.bbox)
+    // Light text painted AFTER this cover and sitting mostly on it is a
+    // visible overlay label (an exemption reason stamped on the box). Runs it
+    // tiles are dropped from both the hidden-text and word-size analyses.
+    const labelMarks = extract.lightMarks.filter(
+      (m) => m.opIndex > cover.opIndex && coverage(m.bbox, cover.bbox) >= 0.5
+    )
+    const runs =
+      labelMarks.length > 0
+        ? extract.runs.filter(
+            (r) => !isVisibleLabelRun(r, cover.bbox, labelMarks)
+          )
+        : extract.runs
     // Runs that share the cover's line and overlap it horizontally.
-    const overlapping = extract.runs.filter((r) => {
+    const overlapping = runs.filter((r) => {
       if (r.isWhitespace) return false
       if (!sameLine(r.bbox, cover.bbox)) return false
       return intersection(r.bbox, cover.bbox) !== null
@@ -243,7 +296,7 @@ export function checkPage(extract: PageExtract, deadline?: number): Finding[] {
     }
 
     // No recoverable text. Is it an inline word redaction (length leak)?
-    const widthInfo = analyzeWordSize(cover, extract.runs)
+    const widthInfo = analyzeWordSize(cover, runs)
     if (widthInfo) {
       findings.push({
         id: `word-size-${extract.page}-${idx++}`,
@@ -255,7 +308,7 @@ export function checkPage(extract: PageExtract, deadline?: number): Finding[] {
         coverKind: cover.kind,
         title: 'This redaction leaks its length',
         detail:
-          'The text under this box was removed, but the box width still reveals roughly how many characters were hidden — which narrows down what it could say.',
+          'The text under this box was removed, but the box width still reveals roughly how many characters were hidden, which narrows down what it could say.',
         width: widthInfo,
       })
       continue

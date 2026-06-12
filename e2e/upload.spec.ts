@@ -25,7 +25,7 @@ const cases = [
   },
   {
     file: '06-metadata-leak.pdf',
-    grade: 'C',
+    grade: 'B',
     alert: /metadata still names/i,
   },
   {
@@ -78,13 +78,13 @@ test.describe('upload flow detects and alerts', () => {
     await expect(page.getByText('Jordan Hayes')).toBeVisible()
   })
 
-  test('share / Wrapped modal opens from results', async ({page}) => {
+  test('share / report modal opens from results', async ({page}) => {
     await page.goto('/')
     await page
       .locator('input[type=file]')
       .setInputFiles(`${examplesDir}/01-superficial-mark.pdf`)
     await expect(page.getByText('Redaction grade')).toBeVisible()
-    await page.getByRole('button', {name: /see your wrapped/i}).click()
-    await expect(page.getByText('Your redaction Wrapped')).toBeVisible()
+    await page.getByRole('button', {name: /see your report/i}).click()
+    await expect(page.getByText('Your redaction report')).toBeVisible()
   })
 })

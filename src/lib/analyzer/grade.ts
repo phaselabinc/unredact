@@ -14,15 +14,16 @@ const GRADE_BY_TIER: RedactionGrade[] = ['A', 'B', 'C', 'D', 'F']
  *  - recovered text (any leak) → F;
  *  - a removable / un-applied mark → D: nothing leaked yet, but the cover lifts
  *    straight off and the content returns;
- *  - leaked metadata → C: real text escapes via the document properties;
- *  - a box-width length hint or a leftover bookmark → only B: speculative,
- *    nothing recoverable.
+ *  - everything else (a box-width length hint, leftover document properties, a
+ *    leftover bookmark) → B: minor hints, nothing from under a box.
+ *
+ * C is currently unreached: metadata used to grade C, but a title or bookmark
+ * naming the document is a heads-up, not a failed redaction.
  */
 function gradeTier(f: Finding): number {
   if (f.severity === 'leak') return 4 // F
   if (f.check === 'removable-annotation') return 3 // D
-  if (f.check === 'metadata-leak') return 2 // C
-  return 1 // B — word-size, outline/bookmark, other non-recoverable hints
+  return 1 // B — word-size, metadata, outline/bookmark, other minor hints
 }
 
 export function summarize(

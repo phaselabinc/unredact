@@ -55,7 +55,7 @@
   {
     "file": "06-metadata-leak.pdf",
     "title": "Clean body, leaky document properties",
-    "grade": "C",
+    "grade": "B",
     "expectChecks": [
       "metadata-leak"
     ],
@@ -85,5 +85,23 @@
     "title": "Correctly redacted (no leaks)",
     "grade": "A",
     "expectNoFindings": true
+  },
+  {
+    "file": "10-exemption-overlay.pdf",
+    "title": "Visible exemption label over an applied redaction",
+    "grade": "A",
+    "expectNoFindings": true
+  },
+  {
+    "file": "11-white-text-under-box.pdf",
+    "title": "White text painted before the box",
+    "grade": "F",
+    "expectChecks": [
+      "superficial-mark"
+    ],
+    "minLeaks": 1,
+    "recoveredIncludes": [
+      "2,750,000"
+    ]
   }
 ]

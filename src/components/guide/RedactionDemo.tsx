@@ -66,8 +66,8 @@ export function RedactionDemo() {
       <p className="mt-4 flex items-start gap-2 text-sm text-brand-ink/60">
         <FiMousePointer className="mt-0.5 h-4 w-4 shrink-0 text-brand-vermillion" />
         <span>
-          The text never went anywhere — the box is just a black rectangle drawn
-          on top. Changing the colour behind it (or selecting and copying)
+          The text never went anywhere. The box is just a black rectangle drawn
+          on top, and changing the colour behind it (or selecting and copying)
           reveals it instantly. <strong>unredact</strong> reads it straight from
           the file.
         </span>

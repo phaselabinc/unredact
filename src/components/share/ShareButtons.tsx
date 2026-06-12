@@ -15,12 +15,12 @@ const SITE_URL = 'https://unredact.phaselab.co'
 
 function shareText(summary: AnalysisSummary): string {
   if (summary.grade === 'F') {
-    return `I ran a "redacted" PDF through unredact and it scored an F — the hidden text was sitting right under the black boxes. Most redactions don't actually remove anything. Check your own:`
+    return `I ran a "redacted" PDF through unredact and it scored an F. The hidden text was sitting right under the black boxes. Check your own:`
   }
   if (summary.grade === 'A') {
-    return `I ran my redacted PDF through unredact and it scored an A — properly redacted, nothing recoverable. Check yours:`
+    return `I ran my redacted PDF through unredact and it scored an A. Properly redacted, nothing recoverable. Check yours:`
   }
-  return `I checked a redacted PDF with unredact and it scored a ${summary.grade}. Most "redactions" leak more than people think. Check your own:`
+  return `I checked a redacted PDF with unredact and it scored a ${summary.grade}. Redactions leak more than people think. Check your own:`
 }
 
 export function ShareButtons({
@@ -158,8 +158,8 @@ export function ShareButtons({
       </div>
 
       <p className="text-[0.7rem] leading-relaxed text-brand-ink/45">
-        The shareable image shows only your grade and counts — never your file,
-        its name, or anything we recovered from it.
+        The shareable image shows only your grade and counts. It never includes
+        your file, its name, or anything we recovered from it.
       </p>
     </div>
   )

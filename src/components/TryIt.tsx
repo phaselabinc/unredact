@@ -41,7 +41,7 @@ export function TryIt() {
   }, [])
 
   const handleSampleError = useCallback(() => {
-    setError('We couldn’t load the sample — try uploading a PDF instead.')
+    setError('We couldn’t load the sample. Try one of your own PDFs instead.')
     setStatus('error')
   }, [])
 

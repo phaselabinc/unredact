@@ -87,8 +87,13 @@ export function UploadDropzone({
           We’ll scan it for failed redactions on the spot.
         </p>
         <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-brand-blue/10 px-3 py-1 text-xs font-medium text-brand-blue">
-          <FiLock className="h-3 w-3" /> Nothing is uploaded — analysis runs on
-          your device
+          <FiLock className="h-3 w-3" /> Nothing is uploaded. The analysis runs
+          on your device.
+        </p>
+        <p className="mt-4 max-w-md text-xs leading-relaxed text-brand-ink/45">
+          A clean result means we didn’t find the failures we check for, not
+          that a document is provably safe. For real matters, redact with tools
+          built for it.
         </p>
       </div>
 

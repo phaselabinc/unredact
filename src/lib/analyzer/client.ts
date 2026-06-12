@@ -116,7 +116,7 @@ export class PdfAnalyzer {
       await this.destroy()
       throw new AnalyzerError(
         'too-many-pages',
-        `This PDF has ${totalPages} pages — more than this in-browser tool will scan (${MAX_PAGES}).`
+        `This PDF has ${totalPages} pages, more than this in-browser tool will scan (${MAX_PAGES}).`
       )
     }
 

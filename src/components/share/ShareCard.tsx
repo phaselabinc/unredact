@@ -15,7 +15,7 @@ function headline(summary: AnalysisSummary): {title: string; sub: string} {
   if (summary.grade === 'D') {
     return {
       title: 'These redactions leak.',
-      sub: 'The text was removed — but the box sizes still give away what they hide.',
+      sub: 'The text was removed, but the box sizes still give away what they hide.',
     }
   }
   if (summary.grade === 'C') {
@@ -27,7 +27,7 @@ function headline(summary: AnalysisSummary): {title: string; sub: string} {
   if (summary.grade === 'B') {
     return {
       title: 'Almost airtight.',
-      sub: 'Nothing recoverable — but a structural detail could still hint at content.',
+      sub: 'Nothing recoverable, but a small detail like a box width or the document properties could still hint at content.',
     }
   }
   return {
@@ -48,7 +48,7 @@ const Stat = ({value, label}: {value: string; label: string}) => (
 )
 
 /**
- * The screenshot-friendly "Wrapped" card. It is rendered from AnalysisSummary
+ * The screenshot-friendly report card. It is rendered from AnalysisSummary
  * ONLY — counts and labels, never recovered text or filenames — so it is always
  * safe to share publicly.
  */

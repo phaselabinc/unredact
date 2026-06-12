@@ -25,13 +25,13 @@ const mono = JetBrains_Mono({
 })
 
 const SITE_URL = 'https://unredact.phaselab.co'
-const TITLE = 'Unredact — is your redaction actually safe?'
+const TITLE = 'Unredact: is your redaction actually safe?'
 const DESCRIPTION =
-  'A free tool from phaselaw that finds failed PDF redactions — black boxes you can still read underneath, words you can guess from their size, and hidden text. It all runs in your browser. Your file never leaves your device.'
+  'A free, open-source tool from phaselaw that finds failed PDF redactions: black boxes you can still read underneath, words you can guess from their size, and hidden text. It all runs in your browser. Your file never leaves your device.'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: {default: TITLE, template: '%s — Unredact'},
+  title: {default: TITLE, template: '%s · Unredact'},
   description: DESCRIPTION,
   applicationName: 'Unredact',
   keywords: [

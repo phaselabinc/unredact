@@ -6,7 +6,7 @@ import type {AnalysisSummary} from '@/lib/analyzer/types'
 import {ShareCard} from './ShareCard'
 import {ShareButtons} from './ShareButtons'
 
-export function WrappedModal({
+export function ReportModal({
   summary,
   open,
   onClose,
@@ -53,7 +53,7 @@ export function WrappedModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-bold">Your redaction Wrapped</h2>
+          <h2 className="text-lg font-bold">Your redaction report</h2>
           <button
             type="button"
             onClick={onClose}

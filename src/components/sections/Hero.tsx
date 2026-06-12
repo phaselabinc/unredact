@@ -33,9 +33,9 @@ export function Hero() {
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-brand-ink/70">
-            Most “redacted” PDFs still carry the very text they’re meant to
-            hide. Drop one in and we’ll try to read what’s under the black boxes
-            — entirely in your browser. Your file never leaves your device.
+            Many “redacted” PDFs still contain the text they were supposed to
+            hide. Drop one in and we’ll try to read what’s under the black
+            boxes, right in your browser. Your file never leaves your device.
           </p>
 
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -54,8 +54,8 @@ export function Hero() {
           </div>
 
           <p className="mt-6 inline-flex items-center gap-1.5 text-sm text-brand-ink/50">
-            <FiShield className="h-4 w-4 text-brand-blue" /> No upload · no
-            account · no storage · open about how it works
+            <FiShield className="h-4 w-4 text-brand-blue" /> No upload. No
+            account. Open source.
           </p>
         </div>
       </div>

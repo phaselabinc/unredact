@@ -35,6 +35,20 @@ export const MAX_IMAGE_PIXELS = 24 * 1024 * 1024 // ~24 MP
 /** A fill counts as "dark enough to be a redaction" below this luma (0..255). */
 export const DARK_LUMA_MAX = 48
 
+/**
+ * Text painted at or above this luma (0..255) is bright enough to read against
+ * any cover we accept as "dark" (see DARK_LUMA_MAX), so when it is drawn AFTER
+ * the cover it is a visible overlay label (an exemption code stamped on an
+ * applied redaction), not hidden content.
+ */
+export const LIGHT_TEXT_LUMA_MIN = 120
+
+/**
+ * Fraction of a run's extent inside a cover that must be tiled by visible
+ * overlay-label text for the run to be dismissed as the label itself.
+ */
+export const LABEL_RUN_COVERAGE = 0.7
+
 /** Fraction of a glyph box that must be covered to count as redacted. */
 export const MIN_COVERAGE = 0.6
 

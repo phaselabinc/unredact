@@ -1,5 +1,7 @@
-import {FiExternalLink} from 'react-icons/fi'
+import {FiExternalLink, FiGithub} from 'react-icons/fi'
 import {BrandGlyph} from './Logo'
+
+const GITHUB_URL = 'https://github.com/phaselabinc/unredact'
 
 export function SiteFooter() {
   return (
@@ -22,7 +24,7 @@ export function SiteFooter() {
                 phaselaw
               </a>
               . We build ediscovery &amp; DSAR software that helps legal and HR
-              teams redact documents the right way — so the black box actually
+              teams redact documents the right way, so the black box actually
               means something.
             </p>
             <a
@@ -63,6 +65,16 @@ export function SiteFooter() {
                     href="#privacy"
                   >
                     Privacy &amp; security
+                  </a>
+                </li>
+                <li>
+                  <a
+                    className="inline-flex items-center gap-1 text-brand-cream/80 hover:text-brand-cream"
+                    href={GITHUB_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Source code <FiGithub className="h-3 w-3" />
                   </a>
                 </li>
               </ul>

@@ -1,7 +1,7 @@
 import {ImageResponse} from 'next/og'
 
 export const runtime = 'edge'
-export const alt = 'unredact — is your redaction actually safe?'
+export const alt = 'unredact: is your redaction actually safe?'
 export const size = {width: 1200, height: 630}
 export const contentType = 'image/png'
 
@@ -62,8 +62,8 @@ export default function OpengraphImage() {
             maxWidth: '900px',
           }}
         >
-          Most “redacted” PDFs still contain the hidden text. Check yours in the
-          browser — it never leaves your device.
+          Many “redacted” PDFs still contain the hidden text. Check yours in the
+          browser. It never leaves your device.
         </div>
       </div>
 

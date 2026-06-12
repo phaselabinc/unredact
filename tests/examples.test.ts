@@ -1,5 +1,5 @@
 import {describe, it, expect} from 'vitest'
-import {readFileSync} from 'node:fs'
+import {existsSync, readFileSync} from 'node:fs'
 import {fileURLToPath} from 'node:url'
 import {analyzeBuffer} from './helpers/analyzeNode'
 
@@ -60,6 +60,29 @@ describe('example documents are detected correctly', () => {
       }
     })
   }
+})
+
+describe('phaselaw-style exports with exemption reasons displayed', () => {
+  // This export applies its redactions (the text is removed) and then prints
+  // the exemption reason in white on top of each black box. That overlay text
+  // is visible by design and must not be read as a failed redaction.
+  // The file lives in examples/real-world/ (gitignored, not committed), so
+  // this runs only when present locally; the committed synthetic fixture
+  // 10-exemption-overlay.pdf covers the same behavior in CI.
+  const pipPath = `${examplesDir}/real-world/Elsa Dubios PIP DRAFT.pdf`
+  const run = existsSync(pipPath) ? it : it.skip
+  run(
+    'does not flag the visible reason text painted over the boxes',
+    async () => {
+      const data = new Uint8Array(readFileSync(pipPath))
+      const {summary} = await analyzeBuffer(data)
+      expect(summary.leakCount).toBe(0)
+      expect(summary.warningCount).toBe(0)
+      expect(summary.checksTriggered).not.toContain('superficial-mark')
+      // Title metadata + bookmarks are minor heads-ups, never worse than a B.
+      expect(summary.grade).toBe('B')
+    }
+  )
 })
 
 describe('the clean control never false-positives', () => {

@@ -15,7 +15,7 @@ const CASES = [
   {
     when: '2019',
     who: 'A U.S. court filing',
-    what: 'Lawyers “blacked out” passages, but the text could be copied straight out of the PDF — revealing sensitive details under the boxes.',
+    what: 'Lawyers “blacked out” passages, but the text could be copied straight out of the PDF, exposing sensitive details under the boxes.',
   },
   {
     when: '2021',
@@ -41,7 +41,7 @@ export function VisualGuide() {
             How redactions fail
           </h2>
           <p className="mt-4 text-lg text-brand-ink/70">
-            A black box looks final. But a PDF is data, not a photo of paper —
+            A black box looks final. But a PDF is data, not a photo of paper,
             and the “hidden” text is often still right there. Here’s what we
             look for.
           </p>
@@ -56,13 +56,13 @@ export function VisualGuide() {
             <p className="mt-3 text-brand-ink/70">
               The most common failure by far: someone draws a filled rectangle
               over the words, exports the PDF, and ships it. The rectangle is
-              just decoration painted on top — the original characters are still
+              just decoration painted on top. The original characters are still
               in the file, fully selectable and searchable. Try the demo: the
               text was there the whole time.
             </p>
             <p className="mt-3 text-brand-ink/70">
-              Proper redaction <em>removes</em> the underlying content. That’s
-              the difference between hiding something and pretending to.
+              Proper redaction <em>removes</em> the underlying content instead
+              of covering it up.
             </p>
           </div>
         </div>
@@ -96,12 +96,11 @@ export function VisualGuide() {
         {/* Real-world cases */}
         <div className="mt-16 rounded-3xl bg-brand-ink p-8 text-brand-cream sm:p-10">
           <h3 className="font-display text-2xl font-bold">
-            This keeps happening — to people who should know better
+            This keeps happening, even to people who should know better
           </h3>
           <p className="mt-2 max-w-2xl text-brand-cream/70">
             Botched redactions have exposed informants, deal terms, and personal
-            data in high-profile documents. The tools changed; the mistake
-            didn’t.
+            data in high-profile documents. New tools, same mistake.
           </p>
           <div className="mt-8 grid gap-6 sm:grid-cols-3">
             {CASES.map((c) => (

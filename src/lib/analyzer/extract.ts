@@ -1,13 +1,14 @@
 import type {PDFDocumentProxy, PDFPageProxy} from 'pdfjs-dist'
 import type {BBox, CoverKind, FontClass} from './types'
 import {
+  LIGHT_TEXT_LUMA_MIN,
   MAX_COVERS_PER_PAGE,
   MAX_OPS_PER_PAGE,
   MAX_TEXT_ITEMS_PER_PAGE,
   MIN_COVER_AREA,
   MIN_COVER_THICKNESS_PT,
 } from './constants'
-import {cmykToRgb, grayToRgb, isDark, type RGB} from './color'
+import {cmykToRgb, grayToRgb, isDark, luma, type RGB} from './color'
 import {area, height, normalize, width} from './geometry'
 
 type Pdfjs = typeof import('pdfjs-dist')
@@ -27,7 +28,24 @@ export interface Cover {
   bbox: BBox
   kind: CoverKind
   rgb: RGB | null
+  /**
+   * Position of the op that painted this cover in the page's operator list, so
+   * checks can tell what was drawn over the cover vs. underneath it. Annotation
+   * covers paint above all page content and get Infinity.
+   */
+  opIndex: number
   subtype?: string
+}
+
+/**
+ * Light-coloured filled text painted somewhere in the content stream. Tracked
+ * (with its op position) so a label stamped ON TOP of a black box — e.g. the
+ * exemption reason some redaction tools print inside applied redactions — can
+ * be told apart from text hidden UNDER the box.
+ */
+export interface TextMark {
+  bbox: BBox
+  opIndex: number
 }
 
 export interface PageExtract {
@@ -36,6 +54,7 @@ export interface PageExtract {
   height: number
   runs: TextRun[]
   covers: Cover[]
+  lightMarks: TextMark[]
   hasLargeImage: boolean
 }
 
@@ -174,34 +193,125 @@ async function extractText(
  * Walk the page operator list, tracking the graphics-state CTM (initialized to
  * the viewport transform so all path geometry comes out in viewport space) and
  * the current fill color, and collect every dark filled region or dark image
- * stencil — the candidate "redaction covers".
+ * stencil — the candidate "redaction covers". The walk also tracks the text
+ * matrix and fill color of shown text, recording light-coloured glyphs as
+ * `lightMarks`: text bright enough to read against a dark cover, which — when
+ * painted after the cover — is a visible overlay label, not hidden content.
  */
 async function extractCovers(
   page: PDFPageProxy,
   pdfjs: Pdfjs
-): Promise<{covers: Cover[]; hasLargeImage: boolean}> {
+): Promise<{covers: Cover[]; lightMarks: TextMark[]; hasLargeImage: boolean}> {
   const {OPS, Util} = pdfjs
   const vp = page.getViewport({scale: 1})
   const pageArea = vp.width * vp.height
   const {fnArray, argsArray} = await page.getOperatorList()
 
-  type State = {ctm: number[]; fill: RGB | null}
-  let state: State = {ctm: vp.transform.slice(), fill: [0, 0, 0]}
+  type State = {
+    ctm: number[]
+    fill: RGB | null
+    fontSize: number
+    charSpacing: number
+    wordSpacing: number
+    hScale: number
+    renderMode: number
+    leading: number
+  }
+  let state: State = {
+    ctm: vp.transform.slice(),
+    fill: [0, 0, 0],
+    fontSize: 0,
+    charSpacing: 0,
+    wordSpacing: 0,
+    hScale: 1,
+    renderMode: 0,
+    leading: 0,
+  }
   const stack: State[] = []
+  // Text/line matrices live between BT/ET only, so they sit outside the q/Q
+  // stack. Both are reassigned (never mutated), so sharing IDENTITY is safe.
+  const IDENTITY = [1, 0, 0, 1, 0, 0]
+  let textMatrix = IDENTITY
+  let lineMatrix = IDENTITY
   // Viewport-space bbox of each pending subpath, awaiting a fill op.
   let pending: BBox[] = []
   const covers: Cover[] = []
+  const lightMarks: TextMark[] = []
   let hasLargeImage = false
 
   const limit = Math.min(fnArray.length, MAX_OPS_PER_PAGE)
-  const pushFill = () => {
+  const pushFill = (opIndex: number) => {
     if (state.fill && isDark(state.fill)) {
       for (const bbox of pending) {
         if (covers.length >= MAX_COVERS_PER_PAGE) break
-        covers.push({bbox, kind: 'path-fill', rgb: state.fill})
+        covers.push({bbox, kind: 'path-fill', rgb: state.fill, opIndex})
       }
     }
     pending = []
+  }
+
+  const translated = (m: number[], x: number, y: number) =>
+    Util.transform(m, [1, 0, 0, 1, x, y]) as number[]
+  const nextLine = () => {
+    lineMatrix = translated(lineMatrix, 0, -state.leading)
+    textMatrix = lineMatrix
+  }
+  /**
+   * Advance the text cursor over one show-text op, and record a mark when the
+   * glyphs are actually filled in a light colour. Render modes with bit 0 set
+   * (stroke-only, invisible, their clipping variants) don't paint with the fill
+   * color, so they can never be a readable label — notably mode 3, the
+   * invisible OCR text this analyzer elsewhere EXPECTS to find hiding.
+   */
+  const showGlyphs = (glyphs: unknown, opIndex: number) => {
+    if (!Array.isArray(glyphs)) return
+    // Advance in unscaled text space (font size and spacing folded in), per the
+    // PDF text-display model: ((w0 − Tj/1000)·Tfs + Tc + Tw)·Th.
+    let adv = 0
+    for (const g of glyphs as Array<
+      number | {width?: number; isSpace?: boolean} | null
+    >) {
+      if (typeof g === 'number') {
+        adv -= (g / 1000) * state.fontSize
+      } else if (g && typeof g === 'object') {
+        adv +=
+          ((g.width ?? 0) / 1000) * state.fontSize +
+          state.charSpacing +
+          (g.isSpace ? state.wordSpacing : 0)
+      }
+    }
+    adv *= state.hScale
+    const fillsVisibly = (state.renderMode & 1) === 0
+    if (
+      adv > 0 &&
+      fillsVisibly &&
+      state.fill &&
+      luma(state.fill) >= LIGHT_TEXT_LUMA_MIN &&
+      lightMarks.length < MAX_TEXT_ITEMS_PER_PAGE
+    ) {
+      const m = Util.transform(state.ctm, textMatrix)
+      const fs = Math.abs(state.fontSize) || 1
+      // Approximate ascent/descent; precision doesn't matter — checks compare
+      // these zones to pdf.js text runs with a same-line test, not exact rects.
+      const corners: Array<[number, number]> = [
+        [0, -0.25 * fs],
+        [adv, -0.25 * fs],
+        [0, 0.8 * fs],
+        [adv, 0.8 * fs],
+      ].map((p) => Util.applyTransform(p, m) as [number, number])
+      const xs = corners.map((c) => c[0])
+      const ys = corners.map((c) => c[1])
+      lightMarks.push({
+        bbox: normalize([
+          Math.min(...xs),
+          Math.min(...ys),
+          Math.max(...xs),
+          Math.max(...ys),
+        ]),
+        opIndex,
+      })
+    }
+    if (adv !== 0) textMatrix = translated(textMatrix, adv, 0)
   }
 
   for (let i = 0; i < limit; i++) {
@@ -209,7 +319,7 @@ async function extractCovers(
     const args = argsArray[i] as unknown[]
     switch (fn) {
       case OPS.save:
-        stack.push({ctm: state.ctm.slice(), fill: state.fill})
+        stack.push({...state, ctm: state.ctm.slice()})
         break
       case OPS.restore: {
         const prev = stack.pop()
@@ -269,13 +379,72 @@ async function extractCovers(
       case OPS.fillStroke:
       case OPS.eoFillStroke:
       case OPS.closeFillStroke:
-        pushFill()
+        pushFill(i)
         break
       case OPS.stroke:
       case OPS.closeStroke:
         // Painted but not filled — discard the path without flagging it.
         pending = []
         break
+      case OPS.beginText:
+        textMatrix = IDENTITY
+        lineMatrix = IDENTITY
+        break
+      case OPS.setTextMatrix:
+        textMatrix = (args as number[]).slice()
+        lineMatrix = textMatrix
+        break
+      case OPS.moveText:
+        lineMatrix = translated(
+          lineMatrix,
+          (args as number[])[0] ?? 0,
+          (args as number[])[1] ?? 0
+        )
+        textMatrix = lineMatrix
+        break
+      case OPS.setLeadingMoveText: {
+        const a = args as number[]
+        state.leading = -(a[1] ?? 0)
+        lineMatrix = translated(lineMatrix, a[0] ?? 0, a[1] ?? 0)
+        textMatrix = lineMatrix
+        break
+      }
+      case OPS.nextLine:
+        nextLine()
+        break
+      case OPS.setLeading:
+        state.leading = (args as number[])[0] ?? 0
+        break
+      case OPS.setFont:
+        state.fontSize = ((args as unknown[])[1] as number) ?? state.fontSize
+        break
+      case OPS.setCharSpacing:
+        state.charSpacing = (args as number[])[0] ?? 0
+        break
+      case OPS.setWordSpacing:
+        state.wordSpacing = (args as number[])[0] ?? 0
+        break
+      case OPS.setHScale:
+        state.hScale = ((args as number[])[0] ?? 100) / 100
+        break
+      case OPS.setTextRenderingMode:
+        state.renderMode = (args as number[])[0] ?? 0
+        break
+      case OPS.showText:
+        showGlyphs((args as unknown[])[0], i)
+        break
+      case OPS.nextLineShowText:
+        nextLine()
+        showGlyphs((args as unknown[])[0], i)
+        break
+      case OPS.nextLineSetSpacingShowText: {
+        const a = args as unknown[]
+        state.wordSpacing = (a[0] as number) ?? 0
+        state.charSpacing = (a[1] as number) ?? 0
+        nextLine()
+        showGlyphs(a[2], i)
+        break
+      }
       case OPS.paintImageMaskXObject: {
         // A stencil mask is painted in the current fill color — a dark one over
         // text is a scanned-style redaction stamp. (Grouped masks each carry
@@ -288,7 +457,7 @@ async function extractCovers(
           isDark(state.fill) &&
           covers.length < MAX_COVERS_PER_PAGE
         ) {
-          covers.push({bbox, kind: 'image-cover', rgb: state.fill})
+          covers.push({bbox, kind: 'image-cover', rgb: state.fill, opIndex: i})
         }
         break
       }
@@ -322,7 +491,7 @@ async function extractCovers(
     }
     return true
   })
-  return {covers: filtered, hasLargeImage}
+  return {covers: filtered, lightMarks, hasLargeImage}
 }
 
 /** Cover rectangles contributed by annotations (sticky-note style redactions). */
@@ -356,14 +525,35 @@ async function extractAnnotationCovers(
       ? [stroke[0] ?? 0, stroke[1] ?? 0, stroke[2] ?? 0]
       : null
 
+    // Annotations paint above the whole content stream, so no page-content
+    // text can sit "on top" of them: opIndex Infinity keeps the overlay-label
+    // exemption from ever applying to annotation covers.
     if (subtype === 'Redact') {
       // A live Redact annotation means "apply" was never run: by definition the
       // content underneath is still present.
-      covers.push({bbox, kind: 'redact-annot', rgb: fill, subtype})
+      covers.push({
+        bbox,
+        kind: 'redact-annot',
+        rgb: fill,
+        opIndex: Infinity,
+        subtype,
+      })
     } else if (subtype === 'Square' && fill && isDark(fill)) {
-      covers.push({bbox, kind: 'square-annot', rgb: fill, subtype})
+      covers.push({
+        bbox,
+        kind: 'square-annot',
+        rgb: fill,
+        opIndex: Infinity,
+        subtype,
+      })
     } else if (subtype === 'Highlight' && fill && isDark(fill)) {
-      covers.push({bbox, kind: 'highlight-annot', rgb: fill, subtype})
+      covers.push({
+        bbox,
+        kind: 'highlight-annot',
+        rgb: fill,
+        opIndex: Infinity,
+        subtype,
+      })
     }
   }
   return covers
@@ -386,6 +576,7 @@ export async function extractPage(
     height: vp.height,
     runs,
     covers: [...vector.covers, ...annots],
+    lightMarks: vector.lightMarks,
     hasLargeImage: vector.hasLargeImage,
   }
 }

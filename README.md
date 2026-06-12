@@ -1,9 +1,13 @@
 # unredact
 
+[![CI](https://github.com/phaselabinc/unredact/actions/workflows/ci.yml/badge.svg)](https://github.com/phaselabinc/unredact/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+
 **Is your redaction actually safe?** A fun, public, fully client-side tool that
-finds failed PDF redactions — black boxes you can still read underneath, words
+finds failed PDF redactions: black boxes you can still read underneath, words
 you can guess from their size, removable marks, and leaky metadata. An
-experiment by [phaselaw](https://phase.law).
+experiment by [phaselaw](https://phase.law), live at
+[unredact.phaselab.co](https://unredact.phaselab.co).
 
 > **The whole point:** your document never leaves your browser. There is no
 > upload, no server that sees your file, and no storage. Analysis runs entirely
@@ -20,9 +24,10 @@ experiment by [phaselaw](https://phase.law).
 | **Metadata leak** | Title / Author / Subject still naming sensitive content in the document properties. |
 | **OCR-layer leak** | An invisible, searchable text layer under a scanned page that a mark didn't actually remove. |
 
-The two mandated checks (superficial marks, word-size) plus three additions were
-chosen from research into real-world redaction failures; see the design notes in
-the PR.
+The checks were chosen from research into real-world redaction failures. A
+clean box graded only for its width is reported as a hint (grade B), and an
+exemption label painted on top of an applied redaction is recognized as
+intentionally visible, never as a leak.
 
 ## Architecture
 
@@ -32,12 +37,16 @@ the PR.
   orchestrator (`client.ts`) runs light geometry/overlap analysis on the main
   thread, page by page, behind hard caps and an overall wall-clock deadline.
   - `extract.ts` — text runs, dark filled-path covers (operator-list walk with a
-    graphics-state CTM stack), annotation covers, metadata/outline.
+    graphics-state CTM stack), annotation covers, metadata/outline. The walk
+    also tracks paint order and text color, so an exemption label stamped in
+    light text *on top of* an applied redaction box (as redaction tools do when
+    "display exemption reasons" is enabled) is recognized as intentionally
+    visible rather than flagged as hidden text.
   - `checks.ts` — the five checks; recovers text by clipping line-runs to the
     box and snapping to word boundaries.
   - `width.ts` — main-thread, calibration-based width estimates for the
     word-size guesser (framed as speculative).
-- **Share** — a "Wrapped"-style card rendered to PNG client-side
+- **Share** — a report card rendered to PNG client-side
   (`html-to-image`) plus X / LinkedIn / Facebook intents. The card and the
   public OG image are built from **counts only** — never recovered text,
   filenames, or document content.
@@ -99,8 +108,8 @@ npm run test:e2e   # Playwright: uploads example PDFs through the real UI and
 The Vitest suite runs the actual `extract` → `checks` → `grade` modules against
 each fixture via pdf.js's Node build, so it tests the shipping detection logic
 (not a reimplementation). The Playwright suite uses your local Google Chrome
-(`channel: 'chrome'`); in CI without Chrome, run `npx playwright install
-chromium` and drop the `channel` in `playwright.config.ts`.
+(`channel: 'chrome'`); CI installs and uses chromium instead (see
+`.github/workflows/ci.yml`). Both run on every push and PR.
 
 ### Real-world documents
 
@@ -131,7 +140,18 @@ into `/public` at build time by `scripts/copy-pdfjs.mjs` (kept out of git).
 
 ## Limitations
 
-A clean result means we didn't find the failures we check for — **not** that a
+A clean result means we didn't find the failures we check for, **not** that a
 document is provably safe. The word-size guesser is deliberately speculative
 (width alone can't identify a word). For real matters, redact with tools built
 for it.
+
+## Contributing
+
+Issues and PRs are welcome; see [CONTRIBUTING.md](./CONTRIBUTING.md) for setup,
+the test/fixture workflow, and the privacy invariants every change must keep.
+Security reports go through
+[private vulnerability reporting](./SECURITY.md) instead of public issues.
+
+## License
+
+[MIT](./LICENSE) © Phaselab Inc. (dba phaselaw)

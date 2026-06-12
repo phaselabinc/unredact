@@ -1,4 +1,6 @@
-import {FiCpu, FiSlash, FiSearch, FiAlertTriangle} from 'react-icons/fi'
+import {FiCpu, FiSlash, FiSearch, FiGithub} from 'react-icons/fi'
+
+const GITHUB_URL = 'https://github.com/phaselabinc/unredact'
 
 const POINTS = [
   {
@@ -14,12 +16,26 @@ const POINTS = [
   {
     Icon: FiSearch,
     title: 'You can verify it',
-    body: 'Open your browser’s network tab while you scan a document — you won’t see it leave. Our security policy blocks the page from sending file data anywhere.',
+    body: 'Open your browser’s network tab while you scan a document. You won’t see it leave, and our security policy blocks the page from sending file data anywhere.',
   },
   {
-    Icon: FiAlertTriangle,
-    title: 'It’s not a guarantee',
-    body: 'A clean result means we didn’t find the failures we check for — not that a document is provably safe. For real matters, redact with tools built for it.',
+    Icon: FiGithub,
+    title: 'It’s open source',
+    body: (
+      <>
+        The full source code is{' '}
+        <a
+          href={GITHUB_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-medium text-brand-ink underline decoration-brand-vermillion underline-offset-2"
+        >
+          on GitHub
+        </a>
+        . You can read exactly what the analyzer does, run it yourself, or open
+        an issue if we got something wrong.
+      </>
+    ),
   },
 ]
 
@@ -32,8 +48,8 @@ export function Privacy() {
             Your document never leaves your browser
           </h2>
           <p className="mt-4 text-lg text-brand-ink/70">
-            This tool is public and anyone can use it — which is exactly why we
-            built it to never receive your file in the first place.
+            This tool is public and anyone can use it, so we built it to never
+            receive your file in the first place.
           </p>
         </div>
 

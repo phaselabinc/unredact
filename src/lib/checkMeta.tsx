@@ -28,7 +28,7 @@ export const CHECK_META: Record<CheckId, CheckMeta> = {
     label: 'Box width leaks the length',
     short: 'Word-size leak',
     blurb:
-      'Even when the text is gone, the width of the box reveals roughly how many characters were hidden — which narrows down what it said.',
+      'Even when the text is gone, the width of the box reveals roughly how many characters were hidden, which narrows down what it said.',
     Icon: FiMaximize2,
   },
   'removable-annotation': {
@@ -78,7 +78,7 @@ export const GRADE_META: Record<RedactionGrade, GradeMeta> = {
   B: {
     label: 'Mostly fine',
     blurb:
-      'Nothing recoverable — but a box’s width or a leftover bookmark can still hint at what’s hidden.',
+      'Nothing recoverable, but a box’s width, the document properties, or a leftover bookmark can still hint at what’s hidden.',
     ring: 'text-lime-500',
     bg: 'bg-lime-500',
   },
@@ -91,7 +91,7 @@ export const GRADE_META: Record<RedactionGrade, GradeMeta> = {
   D: {
     label: 'Removable redactions',
     blurb:
-      'No text recovered, but a redaction mark here lifts right off — delete it and the content comes back.',
+      'No text recovered, but a redaction mark here lifts right off. Delete it and the content comes back.',
     ring: 'text-orange-500',
     bg: 'bg-orange-500',
   },

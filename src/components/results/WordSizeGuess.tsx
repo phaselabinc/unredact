@@ -60,7 +60,7 @@ export function WordSizeGuess({
         <span className="font-semibold">
           {width.fontSizePt.toFixed(0)}pt {width.fontClass}
         </span>{' '}
-        type — about{' '}
+        type, which fits about{' '}
         <span className="font-semibold text-brand-vermillion">
           {minC}–{maxC} characters
         </span>
@@ -69,7 +69,7 @@ export function WordSizeGuess({
 
       <div className="mt-3">
         <label className="mb-1 block text-xs font-medium text-brand-ink/60">
-          Try a guess — we’ll tell you if it’s the right size
+          Type a guess and we’ll tell you if it’s the right size
         </label>
         <div className="relative">
           <FiSearch className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-ink/40" />
@@ -157,9 +157,9 @@ export function WordSizeGuess({
                 </div>
               )}
               <p className="mt-2 text-[0.7rem] leading-relaxed text-brand-ink/40">
-                These are words whose rendered width is *consistent with* the
-                box — not what it necessarily says. Width alone can’t identify a
-                word.
+                These are words whose rendered width is <em>consistent with</em>{' '}
+                the box, not what it necessarily says. Width alone can’t
+                identify a word.
               </p>
             </div>
           )}

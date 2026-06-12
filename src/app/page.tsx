@@ -23,8 +23,8 @@ export default function HomePage() {
                 Try it yourself
               </h2>
               <p className="mx-auto mt-4 max-w-xl text-lg text-brand-ink/70">
-                Upload a PDF and we’ll check it for failed redactions on the
-                spot — use any document you like.
+                Pick a PDF and we’ll check it for failed redactions on the spot.
+                Use any document you like.
               </p>
             </div>
             <div className="mt-10">

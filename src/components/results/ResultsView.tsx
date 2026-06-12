@@ -5,7 +5,7 @@ import {FiRefreshCw, FiShare2, FiCheckCircle} from 'react-icons/fi'
 import type {AnalysisResult} from '@/lib/analyzer/types'
 import {GRADE_META} from '@/lib/checkMeta'
 import {RedactionGradeBadge} from '../share/RedactionGrade'
-import {WrappedModal} from '../share/WrappedModal'
+import {ReportModal} from '../share/ReportModal'
 import {FindingCard} from './FindingCard'
 
 type RenderResult = {dataUrl: string; pageWidth: number; pageHeight: number}
@@ -26,7 +26,7 @@ export function ResultsView({
 }) {
   const {summary} = result
   const meta = GRADE_META[summary.grade]
-  const [wrappedOpen, setWrappedOpen] = useState(false)
+  const [reportOpen, setReportOpen] = useState(false)
 
   const findings = useMemo(
     () =>
@@ -76,10 +76,10 @@ export function ResultsView({
         <div className="mt-6 flex flex-col gap-2 sm:flex-row">
           <button
             type="button"
-            onClick={() => setWrappedOpen(true)}
+            onClick={() => setReportOpen(true)}
             className="btn btn-primary rounded-xl normal-case"
           >
-            <FiShare2 className="h-4 w-4" /> See your Wrapped &amp; share
+            <FiShare2 className="h-4 w-4" /> See your report
           </button>
           <button
             type="button"
@@ -92,7 +92,7 @@ export function ResultsView({
 
         {summary.truncated && (
           <p className="mt-4 rounded-xl bg-brand-cream px-3 py-2 text-xs text-brand-ink/60">
-            This is a large document — we scanned the first{' '}
+            This is a large document, so we scanned the first{' '}
             {summary.pagesAnalyzed} pages and stopped to keep things fast.
           </p>
         )}
@@ -109,7 +109,7 @@ export function ResultsView({
             We didn’t find selectable text under any marks, telltale box widths,
             removable annotations, or leaky metadata. That’s what a real
             redaction looks like. (No tool can promise a document is perfectly
-            safe — but this one passed our checks.)
+            safe, but this one passed our checks.)
           </p>
         </div>
       ) : (
@@ -125,10 +125,10 @@ export function ResultsView({
         </div>
       )}
 
-      <WrappedModal
+      <ReportModal
         summary={summary}
-        open={wrappedOpen}
-        onClose={() => setWrappedOpen(false)}
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
       />
     </div>
   )

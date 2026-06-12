@@ -121,7 +121,7 @@ const add = (file, title, bytes, expect) => {
     'Box width leaks the hidden length',
     serialize(objs),
     {
-      grade: 'D',
+      grade: 'B',
       expectChecks: ['word-size'],
       minWarnings: 1,
     }
@@ -246,7 +246,7 @@ const add = (file, title, bytes, expect) => {
     'Clean body, leaky document properties',
     serialize(objs, {info: 6}),
     {
-      grade: 'C',
+      grade: 'B',
       expectChecks: ['metadata-leak'],
       expectNoLeaks: true,
       metadataLeak: true,
@@ -339,6 +339,72 @@ const add = (file, title, bytes, expect) => {
     {
       grade: 'A',
       expectNoFindings: true,
+    }
+  )
+}
+
+// 10) Visible exemption label stamped ON TOP of an applied redaction -----
+// Mirrors what redaction tools export when "show exemption reason" is on:
+// the text under the box was genuinely removed, the black box was drawn, and
+// the reason was painted over the box in white. The label is visible by
+// design and must not be reported as text hidden under the mark.
+{
+  const y = 700
+  const label = 'Redacted - personal privacy'
+  const labelW = tw(label, SIZE)
+  const boxW = labelW / 0.75 // label tiles 75% of the box (over MIN_COVERAGE)
+  const labelX = X + (boxW - labelW) / 2
+  let c = textAt(X, y + 30, 'Disciplinary review, prepared by HR.')
+  c += textAt(X, y - 30, 'Resolution recorded and filed by the clerk.')
+  c += `0 0 0 rg\n${blackBox(X, y, boxW)} f\n`
+  c += `1 1 1 rg\n${textAt(labelX, y, label)}`
+  const objs = [
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    page(''),
+    stream(c),
+    FONT,
+  ]
+  add(
+    '10-exemption-overlay.pdf',
+    'Visible exemption label over an applied redaction',
+    serialize(objs),
+    {
+      grade: 'A',
+      expectNoFindings: true,
+    }
+  )
+}
+
+// 11) White text painted BEFORE the box — hidden, despite the label colour
+// Control for the overlay-label exemption: z-order is what separates a label
+// from a leak. This text could be copied out from under the box, so it must
+// still be flagged even though it is white like an exemption label.
+{
+  const y = 700
+  const pre = 'Approved settlement amount: '
+  const secret = '$2,750,000'
+  const xS = X + tw(pre, SIZE)
+  const wS = tw(secret, SIZE)
+  let c = textAt(X, y, pre)
+  c += `1 1 1 rg\n${textAt(xS, y, secret)}`
+  c += `0 0 0 rg\n${blackBox(xS, y, wS)} f\n`
+  const objs = [
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    page(''),
+    stream(c),
+    FONT,
+  ]
+  add(
+    '11-white-text-under-box.pdf',
+    'White text painted before the box',
+    serialize(objs),
+    {
+      grade: 'F',
+      expectChecks: ['superficial-mark'],
+      minLeaks: 1,
+      recoveredIncludes: ['2,750,000'],
     }
   )
 }

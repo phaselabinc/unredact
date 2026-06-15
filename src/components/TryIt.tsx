@@ -118,7 +118,7 @@ export function TryIt() {
             ? `${progress.findingsSoFar} thing${
                 progress.findingsSoFar === 1 ? '' : 's'
               } found so far…`
-            : 'Looking for text under marks, telltale box widths, and leaky metadata…'}
+            : 'Looking for text under marks and telltale box widths…'}
         </p>
         <p className="mt-2 inline-flex items-center gap-1.5 text-xs text-brand-blue">
           <FiLock className="h-3 w-3" /> Running entirely on your device

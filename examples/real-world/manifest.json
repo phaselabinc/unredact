@@ -9,13 +9,12 @@
       "year": 2009,
       "source": "https://cryptome.org/2013/01/tsa-screening-mgmt-sop.pdf",
       "reportedBy": "Schneier on Security; The Register; Wired — the textbook 'black box over live text' government leak",
-      "failure": "93-page manual where redacted passages were covered with black rectangles but never removed; copy-paste reveals screening thresholds and procedures. Document Title metadata and a PDF bookmark also leak.",
+      "failure": "93-page manual where redacted passages were covered with black rectangles but never removed; copy-paste reveals screening thresholds and procedures.",
       "sha256": "9ca6e9fcf134593bc1259d358776ec69a3605c68a00ab40e92e3929539a21331",
       "expect": {
         "grade": "F",
-        "checks": ["superficial-mark", "metadata-leak", "outline-leak"],
+        "checks": ["superficial-mark"],
         "minLeaks": 20,
-        "metadataLeak": true,
         "leakOnPages": [9, 38, 44]
       }
     },
@@ -33,7 +32,6 @@
         "grade": "F",
         "checks": ["superficial-mark"],
         "minLeaks": 18,
-        "metadataLeak": false,
         "leakOnPages": [5]
       }
     },
@@ -46,13 +44,12 @@
       "source": "https://storage.courtlistener.com/recap/gov.uscourts.nysd.591653/gov.uscourts.nysd.591653.1.1.pdf",
       "canonical": "https://www.justice.gov/multimedia/Court Records/Government of the United States Virgin Islands v. JPMorgan Chase Bank, N.A., No. 122-cv-10904 (S.D.N.Y. 2022)/001-01.pdf",
       "reportedBy": "PDF Association — 'A case study in PDF forensics: The Epstein PDFs' (flags defective redaction on page 41)",
-      "failure": "DoJ-released court exhibit with failed redactions; the PDF Association flagged page 41, and copy-paste recovers text under marks on many pages. Document Title metadata also leaks.",
+      "failure": "DoJ-released court exhibit with failed redactions; the PDF Association flagged page 41, and copy-paste recovers text under marks on many pages.",
       "sha256": "9ff93e1d34ee0fbb8690225da6606ebd806d5f638d7d4d1dc7b26009e7cf48f5",
       "expect": {
         "grade": "F",
-        "checks": ["superficial-mark", "metadata-leak"],
+        "checks": ["superficial-mark"],
         "minLeaks": 50,
-        "metadataLeak": true,
         "leakOnPages": [41]
       }
     },
@@ -70,7 +67,6 @@
         "grade": "A",
         "checks": [],
         "minLeaks": 0,
-        "metadataLeak": false,
         "leakOnPages": []
       }
     }

@@ -16,7 +16,6 @@ interface RealEntry {
     grade: string
     checks: string[]
     minLeaks: number
-    metadataLeak: boolean
     leakOnPages: number[]
   }
 }
@@ -43,7 +42,6 @@ describe('real-world redaction failures (run after `npm run examples:real`)', ()
         // A properly-redacted real document must not trip any check.
         expect(summary.checksTriggered).toEqual([])
         expect(summary.leakCount).toBe(0)
-        expect(summary.metadataLeak).toBe(false)
         return
       }
 
@@ -51,7 +49,6 @@ describe('real-world redaction failures (run after `npm run examples:real`)', ()
         expect(summary.checksTriggered).toContain(check)
       }
       expect(summary.leakCount).toBeGreaterThanOrEqual(entry.expect.minLeaks)
-      expect(summary.metadataLeak).toBe(entry.expect.metadataLeak)
       for (const page of entry.expect.leakOnPages) {
         expect(
           findings.some(

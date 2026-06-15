@@ -14,16 +14,14 @@ const GRADE_BY_TIER: RedactionGrade[] = ['A', 'B', 'C', 'D', 'F']
  *  - recovered text (any leak) → F;
  *  - a removable / un-applied mark → D: nothing leaked yet, but the cover lifts
  *    straight off and the content returns;
- *  - everything else (a box-width length hint, leftover document properties, a
- *    leftover bookmark) → B: minor hints, nothing from under a box.
+ *  - everything else (a box-width length hint, other minor hints) → B.
  *
- * C is currently unreached: metadata used to grade C, but a title or bookmark
- * naming the document is a heads-up, not a failed redaction.
+ * C is currently unreached: no single finding justifies it.
  */
 function gradeTier(f: Finding): number {
   if (f.severity === 'leak') return 4 // F
   if (f.check === 'removable-annotation') return 3 // D
-  return 1 // B — word-size, metadata, outline/bookmark, other minor hints
+  return 1 // B — word-size and other minor hints
 }
 
 export function summarize(
@@ -36,7 +34,6 @@ export function summarize(
   let warningCount = 0
   let infoCount = 0
   let recoveredCharacters = 0
-  let metadataLeak = false
   const checks = new Set<CheckId>()
   let worst: Finding | null = null
   let worstTier = 0
@@ -46,7 +43,6 @@ export function summarize(
     if (f.severity === 'leak') leakCount++
     else if (f.severity === 'warning') warningCount++
     else infoCount++
-    if (f.check === 'metadata-leak') metadataLeak = true
     if (f.recovered) recoveredCharacters += f.recovered.text.length
     if (!worst || SEVERITY_RANK[f.severity] > SEVERITY_RANK[worst.severity]) {
       worst = f
@@ -63,7 +59,6 @@ export function summarize(
     leakCount,
     warningCount,
     infoCount,
-    metadataLeak,
     recoveredCharacters,
     checksTriggered: [...checks],
     worstCheck: worst?.check ?? null,

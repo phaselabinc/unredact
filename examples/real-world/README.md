@@ -24,9 +24,9 @@ lifted out from under black boxes.
 
 | Document | Year | The documented failure | Our grade | Checks fired | Recovered | Detected? |
 | --- | --- | --- | --- | --- | --- | --- |
-| **TSA Screening Management SOP** | 2009 | 93-page manual posted to FedBizOpps with black boxes over live text; copy-paste revealed screening thresholds | **F** | superficial-mark ×25, metadata-leak, outline-leak, word-size | ~15,500 chars across 14+ pages | ✅ |
+| **TSA Screening Management SOP** | 2009 | 93-page manual posted to FedBizOpps with black boxes over live text; copy-paste revealed screening thresholds | **F** | superficial-mark ×25, word-size | ~15,500 chars across 14+ pages | ✅ |
 | **Manafort response** (*US v. Manafort*) | 2019 | Defense drew black boxes over the Kilimnik / 2016-campaign-polling-data passage (p.5); reporters copy-pasted it | **F** | superficial-mark ×32 (incl. p.5) | ~2,300 chars | ✅ |
-| **USVI v. JPMorgan, Exhibit 1** (DoJ Epstein release) | 2022 | Failed redactions the PDF Association flagged on p.41; marks recoverable across the exhibit | **F** | superficial-mark ×71 (incl. p.41), metadata-leak | ~2,600 chars | ✅ |
+| **USVI v. JPMorgan, Exhibit 1** (DoJ Epstein release) | 2022 | Failed redactions the PDF Association flagged on p.41; marks recoverable across the exhibit | **F** | superficial-mark ×71 (incl. p.41) | ~2,600 chars | ✅ |
 | **EU–AstraZeneca APA** *(control)* | 2021 | The infamous copy leaked redacted section titles via PDF bookmarks — but it was online for only hours and was never archived | **A** | none | — | ✅ correctly clean |
 
 Three famous failures, all graded **F** with text recovered from under the
@@ -35,9 +35,10 @@ marks; one famous case kept as a true-negative.
 ### Notes on the cases
 
 - **TSA SOP** is the textbook government redaction failure (Schneier, Wired, The
-  Register, 2009). One real document exercises four of our checks at once:
-  superficial marks, leaked Title metadata, a leaked PDF bookmark
-  (`outline-leak`), and a width-only `word-size` leak.
+  Register, 2009). One real document exercises both of our content checks at
+  once: superficial marks and a width-only `word-size` leak. (The original also
+  leaked Title metadata and a PDF bookmark; those document-level checks are
+  currently disabled.)
 - **Manafort** is the textbook *court-filing* failure — the famous January 2019
   pleading whose blacked-out text journalists recovered by copy-paste. We grab
   the forensically-confirmed copy (DocumentCloud `5677512`); the version on the

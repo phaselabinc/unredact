@@ -1,12 +1,5 @@
 import type {IconType} from 'react-icons'
-import {
-  FiEye,
-  FiMove,
-  FiMaximize2,
-  FiInfo,
-  FiBookmark,
-  FiLayers,
-} from 'react-icons/fi'
+import {FiEye, FiMove, FiMaximize2, FiLayers} from 'react-icons/fi'
 import type {CheckId, RedactionGrade} from './analyzer/types'
 
 export interface CheckMeta {
@@ -38,20 +31,6 @@ export const CHECK_META: Record<CheckId, CheckMeta> = {
       'The black box is a separate annotation sitting on top of the page. Anyone can drag it off, or delete it, and the content returns.',
     Icon: FiMove,
   },
-  'metadata-leak': {
-    label: 'Metadata still leaks',
-    short: 'Metadata leak',
-    blurb:
-      'The document properties (title, author, subject) still carry sensitive text, even after the body was redacted.',
-    Icon: FiInfo,
-  },
-  'outline-leak': {
-    label: 'Bookmarks may reveal content',
-    short: 'Bookmark leak',
-    blurb:
-      'The bookmarks/outline panel still lists section titles that can describe what was redacted in the body.',
-    Icon: FiBookmark,
-  },
   'ocr-layer-leak': {
     label: 'Hidden text layer under a scan',
     short: 'OCR layer leak',
@@ -78,13 +57,14 @@ export const GRADE_META: Record<RedactionGrade, GradeMeta> = {
   B: {
     label: 'Mostly fine',
     blurb:
-      'Nothing recoverable, but a box’s width, the document properties, or a leftover bookmark can still hint at what’s hidden.',
+      'Nothing recoverable, but a box’s width can still hint at what’s hidden.',
     ring: 'text-lime-500',
     bg: 'bg-lime-500',
   },
+  // C is currently unreached (see grade.ts); kept for the grade scale only.
   C: {
-    label: 'Leaking metadata',
-    blurb: 'The body looks covered, but the document properties still talk.',
+    label: 'Minor leak',
+    blurb: 'The body looks covered, but a small detail still hints at content.',
     ring: 'text-amber-500',
     bg: 'bg-amber-500',
   },

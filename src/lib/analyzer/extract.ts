@@ -1,4 +1,4 @@
-import type {PDFDocumentProxy, PDFPageProxy} from 'pdfjs-dist'
+import type {PDFPageProxy} from 'pdfjs-dist'
 import type {BBox, CoverKind, FontClass} from './types'
 import {
   LIGHT_TEXT_LUMA_MIN,
@@ -579,67 +579,6 @@ export async function extractPage(
     lightMarks: vector.lightMarks,
     hasLargeImage: vector.hasLargeImage,
   }
-}
-
-export interface DocMetaLeak {
-  field: string
-  value: string
-}
-
-/** Conservative metadata fields worth surfacing (skip Producer/Creator noise). */
-const META_FIELDS: Array<[key: string, label: string]> = [
-  ['Title', 'Title'],
-  ['Author', 'Author'],
-  ['Subject', 'Subject'],
-  ['Keywords', 'Keywords'],
-]
-
-export async function extractMetadata(
-  doc: PDFDocumentProxy
-): Promise<DocMetaLeak[]> {
-  const leaks: DocMetaLeak[] = []
-  try {
-    const {info} = (await doc.getMetadata()) as unknown as {
-      info?: Record<string, unknown>
-    }
-    if (info) {
-      for (const [key, label] of META_FIELDS) {
-        const value = info[key]
-        if (typeof value === 'string' && value.trim().length > 0) {
-          leaks.push({field: label, value: value.trim().slice(0, 300)})
-        }
-      }
-    }
-  } catch {
-    // metadata is optional
-  }
-  return leaks
-}
-
-interface OutlineNode {
-  title?: string
-  items?: OutlineNode[]
-}
-
-export async function extractOutlineTitles(
-  doc: PDFDocumentProxy
-): Promise<string[]> {
-  const titles: string[] = []
-  try {
-    const outline = (await doc.getOutline()) as OutlineNode[] | null
-    const walk = (nodes: OutlineNode[] | undefined, depth: number) => {
-      if (!nodes || depth > 6) return
-      for (const node of nodes) {
-        if (titles.length >= 200) return
-        if (node.title && node.title.trim()) titles.push(node.title.trim())
-        walk(node.items, depth + 1)
-      }
-    }
-    walk(outline ?? undefined, 0)
-  } catch {
-    // outline is optional
-  }
-  return titles
 }
 
 function clamp(v: number, lo: number, hi: number): number {

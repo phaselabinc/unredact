@@ -107,9 +107,9 @@ export function ResultsView({
           </h3>
           <p className="max-w-md text-sm text-brand-ink/70">
             We didn’t find selectable text under any marks, telltale box widths,
-            removable annotations, or leaky metadata. That’s what a real
-            redaction looks like. (No tool can promise a document is perfectly
-            safe, but this one passed our checks.)
+            or removable annotations. That’s what a real redaction looks like.
+            (No tool can promise a document is perfectly safe, but this one
+            passed our checks.)
           </p>
         </div>
       ) : (

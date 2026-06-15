@@ -5,13 +5,8 @@ import {
   MAX_PAGES,
   MAX_PAGES_ANALYZED,
 } from './constants'
-import {checkDocument, checkPage} from './checks'
-import {
-  extractMetadata,
-  extractOutlineTitles,
-  extractPage,
-  type TextRun,
-} from './extract'
+import {checkPage} from './checks'
+import {extractPage, type TextRun} from './extract'
 import {summarize} from './grade'
 import {classifyLoadError, getPdfjs, openDocument} from './pdf-loader'
 import {validatePdfFile} from './validate'
@@ -126,17 +121,6 @@ export class PdfAnalyzer {
     const deadline = Date.now() + ANALYSIS_DEADLINE_MS
     let pagesAnalyzed = 0
     let truncated = totalPages > MAX_PAGES_ANALYZED
-
-    // Document-level metadata / outline (cheap).
-    try {
-      const [metadata, outline] = await Promise.all([
-        extractMetadata(doc),
-        extractOutlineTitles(doc),
-      ])
-      findings.push(...checkDocument(metadata, outline))
-    } catch {
-      // non-fatal
-    }
 
     for (let pageNum = 1; pageNum <= pagesToScan; pageNum++) {
       throwIfAborted()

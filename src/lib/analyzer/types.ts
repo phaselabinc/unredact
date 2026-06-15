@@ -15,8 +15,6 @@ export type CheckId =
   | 'superficial-mark'
   | 'word-size'
   | 'removable-annotation'
-  | 'metadata-leak'
-  | 'outline-leak'
   | 'ocr-layer-leak'
 
 export type Severity = 'leak' | 'warning' | 'info'
@@ -57,15 +55,10 @@ export interface WidthAnalysis {
   calibration: {sampleText: string; sampleWidthPt: number} | null
 }
 
-export interface MetaField {
-  field: string
-  value: string
-}
-
 export interface Finding {
   id: string
   check: CheckId
-  /** 1-indexed page number (0 for document-level findings like metadata). */
+  /** 1-indexed page number. */
   page: number
   bbox: BBox | null
   severity: Severity
@@ -78,8 +71,6 @@ export interface Finding {
   recovered?: RecoveredText
   /** Word-size analysis payload (check 2). */
   width?: WidthAnalysis
-  /** Metadata / outline leak payload (checks 4). */
-  metaField?: MetaField
 }
 
 export type RedactionGrade = 'A' | 'B' | 'C' | 'D' | 'F'
@@ -95,7 +86,6 @@ export interface AnalysisSummary {
   leakCount: number
   warningCount: number
   infoCount: number
-  metadataLeak: boolean
   recoveredCharacters: number
   checksTriggered: CheckId[]
   worstCheck: CheckId | null

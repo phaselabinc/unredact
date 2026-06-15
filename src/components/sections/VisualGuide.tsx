@@ -6,9 +6,7 @@ const GUIDE_ORDER: CheckId[] = [
   'superficial-mark',
   'word-size',
   'removable-annotation',
-  'metadata-leak',
   'ocr-layer-leak',
-  'outline-leak',
 ]
 
 const CASES = [

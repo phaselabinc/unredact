@@ -15,7 +15,6 @@ interface ManifestEntry {
   minWarnings?: number
   expectNoLeaks?: boolean
   expectNoFindings?: boolean
-  metadataLeak?: boolean
 }
 
 const manifest: ManifestEntry[] = JSON.parse(
@@ -47,9 +46,6 @@ describe('example documents are detected correctly', () => {
       if (fx.expectNoLeaks) {
         expect(summary.leakCount).toBe(0)
       }
-      if (fx.metadataLeak) {
-        expect(summary.metadataLeak).toBe(true)
-      }
       if (fx.recoveredIncludes) {
         const recovered = findings
           .map((f) => f.recovered?.text ?? '')
@@ -79,8 +75,9 @@ describe('phaselaw-style exports with exemption reasons displayed', () => {
       expect(summary.leakCount).toBe(0)
       expect(summary.warningCount).toBe(0)
       expect(summary.checksTriggered).not.toContain('superficial-mark')
-      // Title metadata + bookmarks are minor heads-ups, never worse than a B.
-      expect(summary.grade).toBe('B')
+      // The body is properly redacted and document-level metadata/outline
+      // checks are disabled, so the Title and bookmarks no longer count: clean A.
+      expect(summary.grade).toBe('A')
     }
   )
 })

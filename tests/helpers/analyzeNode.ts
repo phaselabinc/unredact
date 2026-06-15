@@ -3,12 +3,8 @@
 // PdfAnalyzer.analyze does in the browser, minus the worker/timeout plumbing —
 // so the tests exercise the actual detection logic, not a reimplementation.
 import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs'
-import {
-  extractMetadata,
-  extractOutlineTitles,
-  extractPage,
-} from '@/lib/analyzer/extract'
-import {checkDocument, checkPage} from '@/lib/analyzer/checks'
+import {extractPage} from '@/lib/analyzer/extract'
+import {checkPage} from '@/lib/analyzer/checks'
 import {summarize} from '@/lib/analyzer/grade'
 import type {AnalysisResult, Finding} from '@/lib/analyzer/types'
 
@@ -20,12 +16,6 @@ export async function analyzeBuffer(data: Uint8Array): Promise<AnalysisResult> {
   }).promise
   const numPages = doc.numPages
   const findings: Finding[] = []
-
-  const [meta, outline] = await Promise.all([
-    extractMetadata(doc),
-    extractOutlineTitles(doc),
-  ])
-  findings.push(...checkDocument(meta, outline))
 
   for (let p = 1; p <= numPages; p++) {
     const page = await doc.getPage(p)

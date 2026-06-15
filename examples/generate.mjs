@@ -228,31 +228,9 @@ const add = (file, title, bytes, expect) => {
   )
 }
 
-// 6) Metadata leak only (clean body) -------------------------------------
-{
-  const y = 700
-  let c = textAt(X, y, 'This memorandum has been reviewed and approved.')
-  c += textAt(X, y - 30, 'No further action is required at this time.')
-  const objs = [
-    '<< /Type /Catalog /Pages 2 0 R >>',
-    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
-    page(''),
-    stream(c),
-    FONT,
-    '<< /Title (Project Bluebird - Acquisition of Initech) /Author (Dana Whitfield) /Subject (M&A - CONFIDENTIAL) /Producer (Acme PDF 1.0) >>',
-  ]
-  add(
-    '06-metadata-leak.pdf',
-    'Clean body, leaky document properties',
-    serialize(objs, {info: 6}),
-    {
-      grade: 'B',
-      expectChecks: ['metadata-leak'],
-      expectNoLeaks: true,
-      metadataLeak: true,
-    }
-  )
-}
+// 6) (removed) The metadata-leak fixture was retired when document-level
+// metadata/outline checks were disabled. The numbering gap is intentional so
+// the remaining fixtures keep their existing filenames.
 
 // 7) Rotated page (/Rotate 90) with a superficial mark -------------------
 {

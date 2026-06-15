@@ -24,9 +24,9 @@ const cases = [
     alert: /removable redaction mark|un-applied/i,
   },
   {
-    file: '06-metadata-leak.pdf',
+    file: '02-word-size-leak.pdf',
     grade: 'B',
-    alert: /metadata still names/i,
+    alert: /leaks its length/i,
   },
   {
     file: '09-clean-control.pdf',

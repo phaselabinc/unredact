@@ -1,10 +1,4 @@
-import type {
-  Cover,
-  PageExtract,
-  TextMark,
-  TextRun,
-  DocMetaLeak,
-} from './extract'
+import type {Cover, PageExtract, TextMark, TextRun} from './extract'
 import type {BBox, CheckId, CoverKind, Finding, WidthAnalysis} from './types'
 import {LABEL_RUN_COVERAGE, MIN_COVERAGE} from './constants'
 import {coverage, height, intersection, sameLine, width} from './geometry'
@@ -329,51 +323,6 @@ export function checkPage(extract: PageExtract, deadline?: number): Finding[] {
           'This page contains a redaction annotation that was never "applied". In most PDF tools the mark can simply be deleted, and any content it was meant to cover comes back.',
       })
     }
-  }
-
-  return findings
-}
-
-/** Document-level metadata and outline leaks (check 4). */
-export function checkDocument(
-  metadata: DocMetaLeak[],
-  outlineTitles: string[]
-): Finding[] {
-  const findings: Finding[] = []
-
-  metadata.forEach((leak, i) => {
-    findings.push({
-      id: `metadata-leak-${i}`,
-      check: 'metadata-leak',
-      page: 0,
-      bbox: null,
-      severity: 'info',
-      confidence: 0.95,
-      coverKind: 'none',
-      title: `Metadata still names the ${leak.field.toLowerCase()}`,
-      detail:
-        'Even with the body redacted, the document properties still carry this field. It travels with the file and shows up in any PDF reader’s "Document Properties".',
-      metaField: {field: leak.field, value: leak.value},
-    })
-  })
-
-  if (outlineTitles.length > 0) {
-    findings.push({
-      id: 'outline-leak-0',
-      check: 'outline-leak',
-      page: 0,
-      bbox: null,
-      severity: 'info',
-      confidence: 0.5,
-      coverKind: 'none',
-      title: 'Bookmarks may reveal redacted content',
-      detail:
-        'The document’s bookmarks/outline panel still lists section titles. If any of these describe content that was redacted in the body, the title gives it away.',
-      metaField: {
-        field: 'Bookmarks',
-        value: outlineTitles.slice(0, 12).join(' · ').slice(0, 400),
-      },
-    })
   }
 
   return findings

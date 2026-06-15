@@ -53,16 +53,6 @@
     "minLeaks": 1
   },
   {
-    "file": "06-metadata-leak.pdf",
-    "title": "Clean body, leaky document properties",
-    "grade": "B",
-    "expectChecks": [
-      "metadata-leak"
-    ],
-    "expectNoLeaks": true,
-    "metadataLeak": true
-  },
-  {
     "file": "07-rotated-superficial.pdf",
     "title": "Superficial mark on a rotated page",
     "grade": "F",

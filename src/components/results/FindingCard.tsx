@@ -46,7 +46,7 @@ export function FindingCard({
   const [rendering, setRendering] = useState(false)
   const [renderError, setRenderError] = useState(false)
 
-  const revealText = finding.recovered?.text ?? finding.metaField?.value ?? null
+  const revealText = finding.recovered?.text ?? null
 
   // For annotation-based redactions, render with annotations disabled so the
   // cover is removed and the text it was hiding shows in the page image.

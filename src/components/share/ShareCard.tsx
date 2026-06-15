@@ -18,16 +18,10 @@ function headline(summary: AnalysisSummary): {title: string; sub: string} {
       sub: 'The text was removed, but the box sizes still give away what they hide.',
     }
   }
-  if (summary.grade === 'C') {
-    return {
-      title: 'The metadata is still talking.',
-      sub: 'The body looks covered, but the document properties weren’t cleaned.',
-    }
-  }
   if (summary.grade === 'B') {
     return {
       title: 'Almost airtight.',
-      sub: 'Nothing recoverable, but a small detail like a box width or the document properties could still hint at content.',
+      sub: 'Nothing recoverable, but a small detail like a box width could still hint at content.',
     }
   }
   return {
@@ -99,10 +93,7 @@ export const ShareCard = forwardRef<HTMLDivElement, {summary: AnalysisSummary}>(
         <div className="relative grid grid-cols-3 gap-3 border-t border-brand-cream/15 pt-5">
           <Stat value={String(summary.pagesAnalyzed)} label="pages scanned" />
           <Stat value={String(summary.leakCount)} label="recoverable" />
-          <Stat
-            value={summary.metadataLeak ? 'Yes' : 'No'}
-            label="metadata leak"
-          />
+          <Stat value={String(summary.warningCount)} label="risky" />
         </div>
 
         <p className="relative text-center text-xs font-medium text-brand-cream/50">

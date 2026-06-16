@@ -70,7 +70,7 @@ export function VisualGuide() {
           <h3 className="text-center font-display text-2xl font-bold">
             The checks we run
           </h3>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
             {GUIDE_ORDER.map((id) => {
               const meta = CHECK_META[id]
               return (

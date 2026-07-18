@@ -1,6 +1,10 @@
 import type {Cover, PageExtract, TextMark, TextRun} from './extract'
 import type {BBox, CheckId, CoverKind, Finding, WidthAnalysis} from './types'
-import {LABEL_RUN_COVERAGE, MIN_COVERAGE} from './constants'
+import {
+  LABEL_RUN_COVERAGE,
+  MAX_WORD_SIZE_CHARS,
+  MIN_COVERAGE,
+} from './constants'
 import {coverage, height, intersection, sameLine, width} from './geometry'
 
 /**
@@ -113,9 +117,14 @@ function analyzeWordSize(cover: Cover, runs: TextRun[]): WidthAnalysis | null {
     return null
   }
 
-  // Require a word immediately adjacent (a genuine inline gap). The far-side
-  // slack is font-relative (~1 em), NOT the box's own width — otherwise a wide
-  // box would treat text a whole box-width away as "adjacent".
+  // Require words on BOTH sides — a genuine inline gap where a single word was
+  // dropped out of running text. Boxes with text on only one side are usually
+  // not word redactions at all: a mark at a line's start is a classification
+  // portion marking (paragraph to its right, nothing to its left), and one at a
+  // line's end is a whole field like an email "From:" value (label to its left,
+  // nothing to its right). Neither is a guessable word, so both are excluded.
+  // The far-side slack is font-relative (~1 em), NOT the box's own width —
+  // otherwise a wide box would treat text a whole box-width away as "adjacent".
   const gap = Math.max(6, ref.fontSizePt * 0.5)
   const slack = Math.max(4, ref.fontSizePt)
   const hasLeft = lineRuns.some(
@@ -124,7 +133,7 @@ function analyzeWordSize(cover: Cover, runs: TextRun[]): WidthAnalysis | null {
   const hasRight = lineRuns.some(
     (r) => r.bbox[0] >= box[2] - gap && r.bbox[0] <= box[2] + slack
   )
-  if (!hasLeft && !hasRight) return null
+  if (!hasLeft || !hasRight) return null
 
   // Calibrate average glyph width from same-font line text.
   const sameFont = lineRuns.filter(
@@ -154,6 +163,12 @@ function analyzeWordSize(cover: Cover, runs: TextRun[]): WidthAnalysis | null {
     minChars,
     Math.ceil((boxWidthPt / avgGlyphWidthPt) * 1.25)
   )
+
+  // A width-based length estimate is only a meaningful hint for a short token.
+  // Once even the low end of the estimate is longer than any plausible single
+  // word, the box is a redacted phrase or field (e.g. a full "Last, First
+  // <email>" line), where width narrows nothing — so don't flag it at all.
+  if (minChars > MAX_WORD_SIZE_CHARS) return null
 
   // Likely-numeric if the neighbours are dominated by digits/currency.
   const neighbourText = lineRuns.map((r) => r.str).join('')

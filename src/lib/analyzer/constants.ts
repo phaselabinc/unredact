@@ -52,6 +52,14 @@ export const LABEL_RUN_COVERAGE = 0.7
 /** Fraction of a glyph box that must be covered to count as redacted. */
 export const MIN_COVERAGE = 0.6
 
+/**
+ * Longest length (low-end estimate, in characters) for which a box-width "how
+ * many characters?" hint is still meaningful. A single hidden word is short;
+ * once even the minimum estimate exceeds this, the box is a redacted phrase or
+ * whole field, where width narrows nothing — so the word-size check bails.
+ */
+export const MAX_WORD_SIZE_CHARS = 15
+
 /** Minimum cover area (viewport units²) to bother with — ignores hairlines. */
 export const MIN_COVER_AREA = 12
 

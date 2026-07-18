@@ -329,6 +329,25 @@ async function extractCovers(
       case OPS.transform:
         state.ctm = Util.transform(state.ctm, args as number[])
         break
+      case OPS.paintFormXObjectBegin: {
+        // pdf.js flattens Form XObjects inline, bracketing their content with an
+        // implicit save + form-matrix transform (+ bbox clip). Without applying
+        // that matrix, path fills drawn inside a form — e.g. a redaction mark's
+        // appearance stream — come out in the parent's space, shifted off their
+        // true position and onto whatever text happens to sit there. Mirror the
+        // save + transform so covers land where they actually paint; the paired
+        // End restores state. (Text runs are already placed correctly by pdf.js
+        // getTextContent, so an unhandled form matrix desyncs covers from text.)
+        stack.push({...state, ctm: state.ctm.slice()})
+        const matrix = (args as unknown[])[0] as number[] | null | undefined
+        if (matrix) state.ctm = Util.transform(state.ctm, matrix)
+        break
+      }
+      case OPS.paintFormXObjectEnd: {
+        const prev = stack.pop()
+        if (prev) state = prev
+        break
+      }
       case OPS.setFillRGBColor: {
         // Normalized by pdf.js to 0..255 RGB.
         const a = args as number[]
@@ -384,6 +403,17 @@ async function extractCovers(
       case OPS.stroke:
       case OPS.closeStroke:
         // Painted but not filled — discard the path without flagging it.
+        pending = []
+        break
+      case OPS.endPath:
+        // A path that ends without a fill or stroke paints nothing. This is
+        // almost always a clip path (construct -> clip -> endPath, as tools do
+        // to mask an icon or image). If it isn't discarded, its rectangle stays
+        // in `pending` and the NEXT unrelated fill flushes it as a dark cover —
+        // fabricating a "redaction" over whatever visible text the clip region
+        // happened to bound (e.g. footer social handles clipped for layout). A
+        // path that is both clipped AND filled still reaches its fill op with
+        // `pending` intact, so real filled shapes are unaffected.
         pending = []
         break
       case OPS.beginText:
@@ -559,6 +589,27 @@ async function extractAnnotationCovers(
   return covers
 }
 
+/**
+ * Collapse covers that describe the same rectangle. A single redaction mark is
+ * routinely painted many times over — its appearance stream is re-emitted, or
+ * the same fill is stamped repeatedly in the content stream — and without this
+ * one box would produce dozens of identical findings, inflating counts and the
+ * grade. Covers are keyed by kind + integer-rounded bbox; the earliest-painted
+ * instance is kept so the paint-order (opIndex) used by the overlay-label logic
+ * stays correct.
+ */
+function dedupeCovers(covers: Cover[]): Cover[] {
+  const byRect = new Map<string, Cover>()
+  for (const c of covers) {
+    const key = `${c.kind}:${Math.round(c.bbox[0])},${Math.round(
+      c.bbox[1]
+    )},${Math.round(c.bbox[2])},${Math.round(c.bbox[3])}`
+    const prev = byRect.get(key)
+    if (!prev || c.opIndex < prev.opIndex) byRect.set(key, c)
+  }
+  return [...byRect.values()]
+}
+
 export async function extractPage(
   page: PDFPageProxy,
   pageNumber: number,
@@ -575,7 +626,7 @@ export async function extractPage(
     width: vp.width,
     height: vp.height,
     runs,
-    covers: [...vector.covers, ...annots],
+    covers: dedupeCovers([...vector.covers, ...annots]),
     lightMarks: vector.lightMarks,
     hasLargeImage: vector.hasLargeImage,
   }

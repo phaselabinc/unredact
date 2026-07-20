@@ -118,12 +118,17 @@ redaction failures** and runs them through the shipping analyzer. The current
 corpus and a results table live in
 [`examples/real-world/`](./examples/real-world/README.md):
 
+Leak counts are per **passage**: consecutive per-line redaction boxes are merged
+into one block finding, so a hidden paragraph is a single recoverable leak (with
+the full text), not one leak per line.
+
 | Document | Year | Our grade |
 | --- | --- | --- |
-| TSA Screening Management SOP | 2009 | **F** (superficial ×25 + metadata + bookmark + word-size) |
-| Manafort response (*US v. Manafort*) | 2019 | **F** (superficial ×32, incl. the p.5 polling-data passage) |
-| USVI v. JPMorgan, Exhibit 1 (DoJ Epstein release) | 2022 | **F** (superficial ×71, incl. p.41, + metadata) |
+| Calipari / Sgrena AR 15-6 report (US Army) | 2005 | **F** (superficial; hundreds of names and details recovered from under black boxes) |
+| Manafort response (*US v. Manafort*) | 2019 | **F** (superficial; the p.5 polling-data passage recovered as one block) |
+| USVI v. JPMorgan, Exhibit 1 (DoJ Epstein release) | 2022 | **F** (superficial across many pages, incl. p.41) |
 | EU–AstraZeneca contract *(true-negative control)* | 2021 | **A** (correctly clean) |
+| TSA Screening Management SOP *(true-negative control)* | 2009 | **A** (this cryptome copy is a reveal edition — once-hidden text is shown openly, outlined in red; nothing is actually covered) |
 
 These PDFs are **never committed**: they contain the very content their failed
 redactions exposed, and storing improperly-disclosed third-party data in the

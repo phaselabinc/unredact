@@ -3,19 +3,19 @@
   "files": [
     {
       "file": "tsa-screening-sop-2008.pdf",
-      "kind": "failure",
+      "kind": "control",
       "title": "TSA Screening Management Standard Operating Procedures (rev. 3, May 2008)",
       "case": "Transportation Security Administration; posted to FedBizOpps.gov, 2009",
       "year": 2009,
       "source": "https://cryptome.org/2013/01/tsa-screening-mgmt-sop.pdf",
       "reportedBy": "Schneier on Security; The Register; Wired — the textbook 'black box over live text' government leak",
-      "failure": "93-page manual where redacted passages were covered with black rectangles but never removed; copy-paste reveals screening thresholds and procedures.",
+      "failure": "TRUE-NEGATIVE CONTROL. The famous 2009 leak was black boxes over live text. This cryptome copy, however, is a REVEAL edition: the once-hidden passages are printed as normal, fully-visible black text with a red OUTLINE rectangle drawn around each (a clip path + red stroke, no dark fill). Nothing is hidden here, so an A is correct — the passage is openly readable. Kept as a regression guard: the analyzer must NOT flag visible text merely because a drawn box surrounds it (the exact false positive the clip-path/endPath handling in extract.ts prevents). It is NOT a hidden-text fixture; genuine 'black box over live text' cases are covered by manafort and jpmorgan.",
       "sha256": "9ca6e9fcf134593bc1259d358776ec69a3605c68a00ab40e92e3929539a21331",
       "expect": {
-        "grade": "F",
-        "checks": ["superficial-mark"],
-        "minLeaks": 20,
-        "leakOnPages": [9, 38, 44]
+        "grade": "A",
+        "checks": [],
+        "minLeaks": 0,
+        "leakOnPages": []
       }
     },
     {
@@ -26,13 +26,30 @@
       "year": 2019,
       "source": "https://assets.documentcloud.org/documents/5677512/Manafort-20190108-Dc.pdf",
       "reportedBy": "The Guardian; Vice Motherboard — reporters copy-pasted the blacked-out passage",
-      "failure": "Defense drew black boxes over the passage describing Manafort sharing 2016 campaign polling data with Konstantin Kilimnik (page 5); the text underneath was never removed.",
+      "failure": "Defense drew black boxes over the passage describing Manafort sharing 2016 campaign polling data with Konstantin Kilimnik (page 5); the text underneath was never removed. The per-line boxes are merged into whole-paragraph blocks, so the leak count reflects passages (a handful), not lines (~two dozen).",
       "sha256": "7e21c26404618d30b768caf55dfeff5e7b31c651595c55d41a91f54c8852ece0",
       "expect": {
         "grade": "F",
         "checks": ["superficial-mark"],
-        "minLeaks": 18,
+        "minLeaks": 3,
         "leakOnPages": [5]
+      }
+    },
+    {
+      "file": "calipari-army-report-2005.pdf",
+      "kind": "failure",
+      "title": "AR 15-6 Investigation — 4 March 2005 Baghdad checkpoint shooting (Calipari / Sgrena)",
+      "case": "U.S. Army / Multi-National Force–Iraq; released 2005-04-30",
+      "year": 2005,
+      "source": "http://web.archive.org/web/20250217140752id_/https://win.senzabavaglio.info/documenti/calipari/classified.pdf",
+      "reportedBy": "Corriere della Sera & La Repubblica (1-2 May 2005); a textbook 'how not to redact' case — see Wikisource 'Calipari Report'",
+      "failure": "The Army investigation into the checkpoint shooting of Italian intelligence officer Nicola Calipari was posted with black boxes drawn over classified passages, but the text underneath was never removed — names (e.g. 'Andrea Carpani'), unit details, and rules of engagement were selectable and copy-pasteable within hours. Hundreds of inline single-name/phrase redactions, so leaks stay per-box (they don't merge into paragraph blocks).",
+      "sha256": "dccf6b57d0a5b1f94c488b7888712324995c190d20827b9a24b5ac9b3beb5135",
+      "expect": {
+        "grade": "F",
+        "checks": ["superficial-mark"],
+        "minLeaks": 100,
+        "leakOnPages": [1, 5]
       }
     },
     {
@@ -44,12 +61,12 @@
       "source": "https://storage.courtlistener.com/recap/gov.uscourts.nysd.591653/gov.uscourts.nysd.591653.1.1.pdf",
       "canonical": "https://www.justice.gov/multimedia/Court Records/Government of the United States Virgin Islands v. JPMorgan Chase Bank, N.A., No. 122-cv-10904 (S.D.N.Y. 2022)/001-01.pdf",
       "reportedBy": "PDF Association — 'A case study in PDF forensics: The Epstein PDFs' (flags defective redaction on page 41)",
-      "failure": "DoJ-released court exhibit with failed redactions; the PDF Association flagged page 41, and copy-paste recovers text under marks on many pages.",
+      "failure": "DoJ-released court exhibit with failed redactions; the PDF Association flagged page 41, and copy-paste recovers text under marks on many pages. Per-line boxes are merged into paragraph blocks, so the leak count is per-passage.",
       "sha256": "9ff93e1d34ee0fbb8690225da6606ebd806d5f638d7d4d1dc7b26009e7cf48f5",
       "expect": {
         "grade": "F",
         "checks": ["superficial-mark"],
-        "minLeaks": 50,
+        "minLeaks": 25,
         "leakOnPages": [41]
       }
     },

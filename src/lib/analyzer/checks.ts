@@ -5,7 +5,14 @@ import {
   MAX_WORD_SIZE_CHARS,
   MIN_COVERAGE,
 } from './constants'
-import {coverage, height, intersection, sameLine, width} from './geometry'
+import {
+  coverage,
+  height,
+  intersection,
+  sameLine,
+  union,
+  width,
+} from './geometry'
 
 /**
  * pdf.js merges adjacent glyphs into long line-runs, so a redaction box usually
@@ -233,6 +240,107 @@ function isVisibleLabelRun(
   return covered / width(clip) >= LABEL_RUN_COVERAGE
 }
 
+/**
+ * A poorly-redacted paragraph is almost never one big rectangle — redaction
+ * tools draw one black box PER LINE, so the per-cover loop above emits one leak
+ * finding per line. Left as-is, a single hidden paragraph becomes a dozen cards
+ * and its recovered text is split across all of them, so a reader can't read the
+ * passage back in one piece (this is exactly what the Manafort filing does).
+ *
+ * Merge leak findings that stack into one text block: same check, columns that
+ * overlap horizontally, and a vertical gap no larger than about a line. The
+ * merged finding spans the whole block (so the "show in document" overlay frames
+ * the passage) and carries the recovered text joined top-to-bottom, left-to-
+ * right. Non-leak findings (word-size length hints, un-applied marks) are each
+ * their own thing and pass through untouched.
+ */
+export function mergeAdjacentLeaks(findings: Finding[]): Finding[] {
+  const order = new Map<Finding, number>()
+  findings.forEach((f, i) => order.set(f, i))
+
+  const leaks = findings.filter((f) => f.severity === 'leak' && f.bbox)
+  if (leaks.length < 2) return findings
+
+  type Group = {items: Finding[]; bbox: BBox}
+  const groups: Group[] = []
+
+  // Two boxes belong to the same block when their columns overlap and the lower
+  // one starts within about one line-pitch of the block's current bottom. The
+  // horizontal test is against the NARROWER box so a short last line still
+  // attaches to a wide block. The vertical gap may be slightly negative (boxes
+  // that touch or overlap); the ceiling of ~1.25 line-heights admits the next
+  // line of DOUBLE-spaced text (where consecutive line-boxes sit a full box-
+  // height apart, as in the Manafort filing) while still excluding a real
+  // paragraph break, whose blank line puts the next box ~2 pitches down.
+  const continues = (block: BBox, box: BBox): boolean => {
+    const overlapX = Math.min(block[2], box[2]) - Math.max(block[0], box[0])
+    const minW = Math.min(width(block), width(box))
+    if (minW <= 0 || overlapX < minW * 0.35) return false
+    const lineH = Math.min(height(block), height(box)) || height(box)
+    const gap = box[1] - block[3]
+    return gap <= lineH * 1.25
+  }
+
+  // Top-to-bottom, then left-to-right — so each group accumulates in reading
+  // order and its recovered text reads back in the right sequence.
+  const sorted = [...leaks].sort(
+    (a, b) => a.bbox![1] - b.bbox![1] || a.bbox![0] - b.bbox![0]
+  )
+  for (const f of sorted) {
+    const box = f.bbox as BBox
+    let best: Group | null = null
+    for (const g of groups) {
+      if (g.items[0]!.check !== f.check) continue
+      if (!continues(g.bbox, box)) continue
+      // Prefer the closest open group (largest bottom edge above this box).
+      if (!best || g.bbox[3] > best.bbox[3]) best = g
+    }
+    if (best) {
+      best.items.push(f)
+      best.bbox = union(best.bbox, box)
+    } else {
+      groups.push({items: [f], bbox: [...box] as BBox})
+    }
+  }
+
+  const merged: Array<{finding: Finding; order: number}> = []
+  for (const g of groups) {
+    const rank = Math.min(...g.items.map((it) => order.get(it) ?? 0))
+    const first = g.items[0]!
+    if (g.items.length === 1) {
+      merged.push({finding: first, order: rank})
+      continue
+    }
+    const text = g.items
+      .map((it) => it.recovered?.text?.trim() ?? '')
+      .filter(Boolean)
+      .join(' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+    const runCount = g.items.reduce(
+      (n, it) => n + (it.recovered?.runCount ?? 0),
+      0
+    )
+    merged.push({
+      finding: {
+        ...first,
+        bbox: g.bbox,
+        confidence: Math.max(...g.items.map((it) => it.confidence)),
+        recovered: text ? {text, runCount} : first.recovered,
+      },
+      order: rank,
+    })
+  }
+
+  // Re-attach the untouched non-leak findings and restore document order.
+  for (const f of findings) {
+    if (f.severity === 'leak' && f.bbox) continue
+    merged.push({finding: f, order: order.get(f) ?? 0})
+  }
+  merged.sort((a, b) => a.order - b.order)
+  return merged.map((m) => m.finding)
+}
+
 /** Run the per-page covers/text checks (1, 2, 3, 5). */
 export function checkPage(extract: PageExtract, deadline?: number): Finding[] {
   const findings: Finding[] = []
@@ -340,5 +448,5 @@ export function checkPage(extract: PageExtract, deadline?: number): Finding[] {
     }
   }
 
-  return findings
+  return mergeAdjacentLeaks(findings)
 }

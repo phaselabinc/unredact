@@ -43,3 +43,10 @@ yarn-error.log*
 # real-world example PDFs are downloaded on demand, never committed
 # (only examples/real-world/{manifest.json,fetch.mjs,README.md} are tracked)
 /examples/real-world/*.pdf
+
+# batch-scan working dirs and any downloaded document releases. These routinely
+# contain the very content a failed redaction exposed, so they never get
+# committed — see scripts/unredact-scan/scan-release.mjs.
+/scans/
+/election-integrity/
+/dni-scan/

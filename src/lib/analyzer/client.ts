@@ -181,13 +181,12 @@ export class PdfAnalyzer {
   }
 
   /**
-   * Render one page to a PNG data URL for the results view. `revealAnnotations`
-   * disables annotation rendering, so sticky-note redactions vanish and the
-   * text they were covering becomes visible — the "before/after" proof.
+   * Render the original page, including its annotation marks. Recovered text
+   * is shown separately in the results view, never by altering this preview.
    */
   async renderPage(
     pageNum: number,
-    opts: {scale?: number; revealAnnotations?: boolean} = {}
+    opts: {scale?: number} = {}
   ): Promise<{dataUrl: string; pageWidth: number; pageHeight: number}> {
     if (!this.doc) throw new AnalyzerError('unknown', 'No document open.')
     const pdfjs = await getPdfjs()
@@ -212,9 +211,7 @@ export class PdfAnalyzer {
     await page.render({
       canvasContext: ctx,
       viewport,
-      annotationMode: opts.revealAnnotations
-        ? pdfjs.AnnotationMode.DISABLE
-        : pdfjs.AnnotationMode.ENABLE,
+      annotationMode: pdfjs.AnnotationMode.ENABLE,
     }).promise
     const dataUrl = canvas.toDataURL('image/png')
     page.cleanup()

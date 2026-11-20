@@ -81,9 +81,9 @@ export function TryIt() {
   }, [])
 
   const renderPage = useCallback(
-    (page: number, opts?: {revealAnnotations?: boolean}) =>
+    (page: number) =>
       analyzerRef.current
-        ? analyzerRef.current.renderPage(page, opts)
+        ? analyzerRef.current.renderPage(page)
         : Promise.reject(new Error('No document')),
     []
   )

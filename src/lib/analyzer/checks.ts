@@ -425,8 +425,9 @@ export function checkPage(extract: PageExtract, deadline?: number): Finding[] {
       // A mark with real text under it — a recoverable leak.
       const check = leakCheckId(cover.kind, extract.hasLargeImage)
       const recovered = recoverUnder(overlapping, cover.bbox)
-      // A REDACTED-only label is not recovered document content.
-      if (recovered.toLowerCase() === 'redacted') continue
+      // A label or repeated-X placeholder is not recovered document content.
+      const placeholder = recovered.replace(/^\[\s*(.*?)\s*\]$/, '$1')
+      if (/^(?:redacted|x(?:\s*x)+)$/i.test(placeholder)) continue
       const {title, detail} = describeLeak(check, cover.kind)
       findings.push({
         id: `${check}-${extract.page}-${idx++}`,

@@ -34,19 +34,32 @@ function pageWithCoveredText(texts: string[]): PageExtract {
   }
 }
 
-describe('recovered redaction labels', () => {
-  it('ignores a label regardless of case and surrounding whitespace', () => {
-    expect(checkPage(pageWithCoveredText(['  ReDaCtEd  ']))).toEqual([])
+describe('recovered redaction placeholders', () => {
+  it.each([
+    '  ReDaCtEd  ',
+    '[REDACTED]',
+    '[ redacted ]',
+    'XX',
+    'xxx',
+    '  XxX  ',
+    'X X X',
+    '[XXX]',
+    '[ x x x ]',
+  ])('ignores the placeholder %j', (text) => {
+    expect(checkPage(pageWithCoveredText([text]))).toEqual([])
   })
 
-  it('keeps a nearby leak whose text includes the word redacted', () => {
-    const findings = checkPage(
-      pageWithCoveredText(['REDACTED', 'redacted budget'])
-    )
-    expect(findings).toHaveLength(1)
-    expect(findings[0]).toMatchObject({
-      severity: 'leak',
-      recovered: {text: 'redacted budget'},
-    })
-  })
+  it.each(['redacted budget', 'XXX budget', 'Project X', 'XX-123', 'X'])(
+    'keeps substantive or ambiguous text %j beside placeholders',
+    (text) => {
+      const findings = checkPage(
+        pageWithCoveredText(['REDACTED', '[XXX]', text])
+      )
+      expect(findings).toHaveLength(1)
+      expect(findings[0]).toMatchObject({
+        severity: 'leak',
+        recovered: {text},
+      })
+    }
+  )
 })

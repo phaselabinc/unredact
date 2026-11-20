@@ -19,10 +19,7 @@ export function ResultsView({
 }: {
   result: AnalysisResult
   onReset: () => void
-  onRenderPage?: (
-    page: number,
-    opts?: {revealAnnotations?: boolean}
-  ) => Promise<RenderResult>
+  onRenderPage?: (page: number) => Promise<RenderResult>
 }) {
   const {summary} = result
   const meta = GRADE_META[summary.grade]

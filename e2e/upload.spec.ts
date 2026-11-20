@@ -72,9 +72,7 @@ test.describe('upload flow detects and alerts', () => {
     await expect(page.getByText('Redaction grade')).toBeVisible()
 
     // Recovered text is masked until the user clicks reveal.
-    await page
-      .getByRole('button', {name: /reveal what was under the box/i})
-      .click()
+    await page.getByRole('button', {name: 'Reveal text for area 1'}).click()
     await expect(page.getByText('Jordan Hayes')).toBeVisible()
   })
 
@@ -109,11 +107,23 @@ test.describe('upload flow detects and alerts', () => {
     await expect(first.getByText('4 findings', {exact: true})).toBeVisible()
     await expect(second.getByText('1 finding', {exact: true})).toBeVisible()
     await expect(
+      first.getByRole('heading', {
+        name: 'Text is still under the box',
+        exact: true,
+      })
+    ).toHaveCount(1)
+    await expect(
+      first.getByText(
+        'A black box was drawn over this text, but the text itself was never removed. It stays selectable, searchable, and copy-pasteable.',
+        {exact: true}
+      )
+    ).toHaveCount(1)
+    await expect(
       first.getByText('This redaction leaks its length')
     ).toBeVisible()
     await expect(first.getByText('Northwind', {exact: true})).toHaveCount(0)
     const reveal = first.getByRole('button', {
-      name: 'Reveal what was under the box',
+      name: /^Reveal text for area/,
     })
     await expect(reveal).toHaveCount(3)
     // Revealing one passage must not reveal the other passages.
@@ -125,14 +135,32 @@ test.describe('upload flow detects and alerts', () => {
     await expect(
       first.getByText('Project Cardinal', {exact: true})
     ).toBeVisible()
-    await first
-      .getByRole('button', {name: 'Show all findings on this page'})
-      .click()
+    await first.getByRole('button', {name: 'Show original page'}).click()
     await expect(
       first.getByRole('img', {name: 'Page 1', exact: true})
     ).toHaveCount(1)
     await expect(first.locator('[aria-label^="Finding "]')).toHaveCount(4)
-    await expect(first.getByText(/Annotation marks are hidden/)).toBeVisible()
+    // The synthetic square annotation covers [72, 180, 164.5, 195] on a
+    // 612x792 page. Its interior must remain black even after text is revealed.
+    const blackFraction = await first
+      .getByRole('img', {name: 'Page 1', exact: true})
+      .evaluate(async (element) => {
+        const image = element as HTMLImageElement
+        await image.decode()
+        const canvas = document.createElement('canvas')
+        canvas.width = 612
+        canvas.height = 792
+        const context = canvas.getContext('2d')!
+        context.drawImage(image, 0, 0, 612, 792)
+        const pixels = context.getImageData(80, 185, 70, 5).data
+        let black = 0
+        for (let i = 0; i < pixels.length; i += 4) {
+          if (pixels[i]! < 40 && pixels[i + 1]! < 40 && pixels[i + 2]! < 40)
+            black++
+        }
+        return black / (pixels.length / 4)
+      })
+    expect(blackFraction).toBeGreaterThan(0.98)
     await expect(
       second.getByRole('img', {name: 'Page 2', exact: true})
     ).toHaveCount(0)

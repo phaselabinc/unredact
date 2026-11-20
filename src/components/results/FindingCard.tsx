@@ -37,19 +37,18 @@ export function FindingCard({
   onRenderPage?: (page: number) => Promise<RenderResult>
 }) {
   const page = findings[0]!.page
-  const explanations = [
-    ...new Map(
-      findings.map((finding) => [
-        JSON.stringify([
-          finding.check,
-          finding.severity,
-          finding.title,
-          finding.detail,
-        ]),
-        finding,
-      ])
-    ).values(),
-  ]
+  const explanations = new Map<string, {finding: Finding; areas: number[]}>()
+  findings.forEach((finding, index) => {
+    const key = JSON.stringify([
+      finding.check,
+      finding.severity,
+      finding.title,
+      finding.detail,
+    ])
+    const explanation = explanations.get(key)
+    if (explanation) explanation.areas.push(index + 1)
+    else explanations.set(key, {finding, areas: [index + 1]})
+  })
   const [render, setRender] = useState<RenderResult | null>(null)
   const [rendering, setRendering] = useState(false)
   const [renderError, setRenderError] = useState(false)
@@ -80,7 +79,7 @@ export function FindingCard({
         </div>
 
         <div className="mt-3 space-y-3">
-          {explanations.map((finding) => (
+          {[...explanations.values()].map(({finding, areas}) => (
             <div key={finding.id}>
               <div className="flex items-start justify-between gap-3">
                 <h4 className="font-semibold leading-tight">{finding.title}</h4>
@@ -93,6 +92,9 @@ export function FindingCard({
                   {SEVERITY_STYLE[finding.severity].label}
                 </span>
               </div>
+              <p className="mt-0.5 text-xs font-medium text-brand-ink/50">
+                {areas.length === 1 ? 'Area' : 'Areas'} {areas.join(', ')}
+              </p>
               <p className="mt-1 text-sm leading-relaxed text-brand-ink/80">
                 {finding.detail}
               </p>

@@ -106,6 +106,7 @@ test.describe('upload flow detects and alerts', () => {
     ).toHaveCount(2)
     await expect(first.getByText('4 findings', {exact: true})).toBeVisible()
     await expect(second.getByText('1 finding', {exact: true})).toBeVisible()
+    await expect(first.getByText('Areas 1, 2', {exact: true})).toBeVisible()
     await expect(
       first.getByRole('heading', {
         name: 'Text is still under the box',

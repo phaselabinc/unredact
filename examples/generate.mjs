@@ -387,6 +387,44 @@ const add = (file, title, bytes, expect) => {
   )
 }
 
+// 12) Multiple findings per page, including a repeated drawing operation.
+{
+  const secret = 'Northwind'
+  const w = tw(secret, SIZE)
+  const first = `${textAt(X, 700, secret)}0 0 0 rg\n${blackBox(X, 700, w)} f\n`
+  let c = first
+  c += `${blackBox(X, 700, w)} f\n` // duplicate cover, not another leak
+  c += textAt(320, 700, secret)
+  c += `${blackBox(320, 700, w)} f\n`
+  c += textAt(X, 600, 'Project Cardinal')
+  c += textAt(X, 500, 'The code is ')
+  const gapX = X + tw('The code is ', SIZE)
+  c += textAt(gapX + 50, 500, ' for this project.')
+  c += `${blackBox(gapX, 500, 50)} f\n`
+  const objs = [
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [3 0 R 7 0 R] /Count 2 >>',
+    page(' /Annots [6 0 R]'),
+    stream(c),
+    FONT,
+    `<< /Type /Annot /Subtype /Square /Rect [72 597 ${(X + tw('Project Cardinal', SIZE)).toFixed(1)} 612] /C [0 0 0] /IC [0 0 0] /CA 1 >>`,
+    page('', 8),
+    stream(first),
+  ]
+  add(
+    '12-page-findings.pdf',
+    'Grouped pages with distinct and duplicate findings',
+    serialize(objs),
+    {
+      grade: 'F',
+      expectChecks: ['superficial-mark', 'removable-annotation', 'word-size'],
+      minLeaks: 4,
+      minWarnings: 1,
+      recoveredIncludes: ['Northwind', 'Project Cardinal'],
+    }
+  )
+}
+
 writeFileSync(join(OUT, 'manifest.json'), JSON.stringify(fixtures, null, 2))
 console.log(`Wrote ${fixtures.length} example PDFs + manifest.json to ${OUT}`)
 for (const f of fixtures) console.log(`  ${f.file} — grade ${f.grade}`)

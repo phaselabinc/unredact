@@ -44,6 +44,55 @@ function other(bbox: BBox, severity: Severity = 'warning'): Finding {
 }
 
 describe('mergeAdjacentLeaks', () => {
+  it('removes repeated detections before joining a passage', () => {
+    const first = leak([72, 265, 540, 279], 'first line')
+    const merged = mergeAdjacentLeaks([
+      first,
+      {...first, id: 'duplicate'},
+      leak([72, 293, 540, 307], 'second line'),
+    ])
+    expect(merged).toHaveLength(1)
+    expect(merged[0]!.recovered).toEqual({
+      text: 'first line second line',
+      runCount: 2,
+    })
+  })
+
+  it('keeps repeated words in different positions or on different pages', () => {
+    const first = leak([72, 265, 250, 279], 'same words')
+    const right = leak([320, 265, 500, 279], 'same words')
+    const nextPage = {...first, id: 'next-page', page: 2}
+    expect(mergeAdjacentLeaks([first, right, nextPage])).toEqual([
+      first,
+      right,
+      nextPage,
+    ])
+  })
+
+  it('keeps annotation evidence when its appearance also exposes the same text', () => {
+    const drawn = leak([72, 265, 250, 279], 'hidden text')
+    const annotation: Finding = {
+      ...drawn,
+      id: 'annotation',
+      check: 'removable-annotation',
+      coverKind: 'square-annot',
+    }
+    for (const input of [
+      [drawn, annotation],
+      [annotation, drawn],
+    ]) {
+      expect(mergeAdjacentLeaks(input)).toEqual([annotation])
+    }
+  })
+
+  it('deduplicates warnings without dropping different evidence at the same position', () => {
+    const warning = other([72, 265, 250, 279])
+    const hidden = leak([72, 265, 250, 279], 'hidden text')
+    expect(
+      mergeAdjacentLeaks([warning, {...warning, id: 'duplicate'}, hidden])
+    ).toEqual([warning, hidden])
+  })
+
   it('merges consecutive double-spaced lines into one passage', () => {
     // 14pt-tall boxes stacked a full box-height apart (double-spaced), same
     // left column — the Manafort shape. Expect a single merged block.

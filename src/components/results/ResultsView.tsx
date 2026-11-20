@@ -2,7 +2,7 @@
 
 import {useMemo, useState} from 'react'
 import {FiRefreshCw, FiShare2, FiCheckCircle} from 'react-icons/fi'
-import type {AnalysisResult} from '@/lib/analyzer/types'
+import type {AnalysisResult, Finding} from '@/lib/analyzer/types'
 import {GRADE_META} from '@/lib/checkMeta'
 import {RedactionGradeBadge} from '../share/RedactionGrade'
 import {ReportModal} from '../share/ReportModal'
@@ -28,15 +28,26 @@ export function ResultsView({
   const meta = GRADE_META[summary.grade]
   const [reportOpen, setReportOpen] = useState(false)
 
-  const findings = useMemo(
-    () =>
-      [...result.findings].sort(
+  const pages = useMemo(() => {
+    const groups = new Map<number, Finding[]>()
+    const sorted = [...result.findings].sort(
+      (a, b) =>
+        SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity] ||
+        a.page - b.page
+    )
+    for (const finding of sorted) {
+      const group = groups.get(finding.page)
+      if (group) group.push(finding)
+      else groups.set(finding.page, [finding])
+    }
+    return [...groups.values()].map((group) =>
+      group.sort(
         (a, b) =>
-          SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity] ||
-          a.page - b.page
-      ),
-    [result.findings]
-  )
+          (a.bbox?.[1] ?? Infinity) - (b.bbox?.[1] ?? Infinity) ||
+          (a.bbox?.[0] ?? Infinity) - (b.bbox?.[0] ?? Infinity)
+      )
+    )
+  }, [result.findings])
 
   const clean = summary.totalFindings === 0
 
@@ -60,7 +71,7 @@ export function ResultsView({
               <span className="font-semibold text-brand-vermillion">
                 {summary.leakCount}
               </span>{' '}
-              recoverable ·{' '}
+              recoverable passages ·{' '}
               <span className="font-semibold text-brand-pumpkin">
                 {summary.warningCount}
               </span>{' '}
@@ -114,10 +125,13 @@ export function ResultsView({
         </div>
       ) : (
         <div className="mt-6 grid gap-4">
-          {findings.map((finding) => (
+          <p className="text-sm font-medium text-brand-ink/60">
+            Problems on {pages.length} {pages.length === 1 ? 'page' : 'pages'}
+          </p>
+          {pages.map((findings) => (
             <FindingCard
-              key={finding.id}
-              finding={finding}
+              key={findings[0]!.page}
+              findings={findings}
               docTokens={result.docTokens}
               onRenderPage={onRenderPage}
             />

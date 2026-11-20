@@ -93,5 +93,21 @@
     "recoveredIncludes": [
       "2,750,000"
     ]
+  },
+  {
+    "file": "12-page-findings.pdf",
+    "title": "Grouped pages with distinct and duplicate findings",
+    "grade": "F",
+    "expectChecks": [
+      "superficial-mark",
+      "removable-annotation",
+      "word-size"
+    ],
+    "minLeaks": 4,
+    "minWarnings": 1,
+    "recoveredIncludes": [
+      "Northwind",
+      "Project Cardinal"
+    ]
   }
 ]

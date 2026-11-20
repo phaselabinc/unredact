@@ -255,6 +255,37 @@ function isVisibleLabelRun(
  * their own thing and pass through untouched.
  */
 export function mergeAdjacentLeaks(findings: Finding[]): Finding[] {
+  // Repeated PDF drawing operations can detect the same box twice. Remove
+  // those before joining lines so the recovered passage and counts stay unique.
+  // Position is part of the key: the same words elsewhere are still a finding.
+  const seen = new Map<string, number>()
+  const unique: Finding[] = []
+  // An annotation's appearance can also be detected as a drawn cover. Prefer
+  // the annotation finding: it explains both the recovery and the removable mark.
+  const evidenceRank = (f: Finding) =>
+    f.coverKind.endsWith('-annot') ? 3 : f.check === 'ocr-layer-leak' ? 2 : 1
+  for (const f of findings) {
+    if (!f.bbox) {
+      unique.push(f)
+      continue
+    }
+    const key = JSON.stringify([
+      f.page,
+      f.bbox,
+      f.severity,
+      f.severity === 'leak' ? null : f.check,
+      f.recovered?.text,
+      f.width,
+    ])
+    const index = seen.get(key)
+    if (index === undefined) {
+      seen.set(key, unique.length)
+      unique.push(f)
+    } else if (evidenceRank(f) > evidenceRank(unique[index]!)) {
+      unique[index] = f
+    }
+  }
+  findings = unique
   const order = new Map<Finding, number>()
   findings.forEach((f, i) => order.set(f, i))
 
@@ -290,7 +321,7 @@ export function mergeAdjacentLeaks(findings: Finding[]): Finding[] {
     const box = f.bbox as BBox
     let best: Group | null = null
     for (const g of groups) {
-      if (g.items[0]!.check !== f.check) continue
+      if (g.items[0]!.check !== f.check || g.items[0]!.page !== f.page) continue
       if (!continues(g.bbox, box)) continue
       // Prefer the closest open group (largest bottom edge above this box).
       if (!best || g.bbox[3] > best.bbox[3]) best = g

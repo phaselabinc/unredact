@@ -1,0 +1,58 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R 7 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Annots [6 0 R] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 343 >>
+stream
+BT /F1 13 Tf 72.0 700 Td (Northwind) Tj ET
+0 0 0 rg
+72.0 697.0 58.5 15 re f
+72.0 697.0 58.5 15 re f
+BT /F1 13 Tf 320.0 700 Td (Northwind) Tj ET
+320.0 697.0 58.5 15 re f
+BT /F1 13 Tf 72.0 600 Td (Project Cardinal) Tj ET
+BT /F1 13 Tf 72.0 500 Td (The code is ) Tj ET
+BT /F1 13 Tf 192.8 500 Td ( for this project.) Tj ET
+142.8 497.0 50.0 15 re f
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+6 0 obj
+<< /Type /Annot /Subtype /Square /Rect [72 597 164.5 612] /C [0 0 0] /IC [0 0 0] /CA 1 >>
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 5 0 R >> >> /Contents 8 0 R >>
+endobj
+8 0 obj
+<< /Length 76 >>
+stream
+BT /F1 13 Tf 72.0 700 Td (Northwind) Tj ET
+0 0 0 rg
+72.0 697.0 58.5 15 re f
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000121 00000 n 
+0000000263 00000 n 
+0000000656 00000 n 
+0000000726 00000 n 
+0000000831 00000 n 
+0000000957 00000 n 
+trailer
+<< /Size 9 /Root 1 0 R >>
+startxref
+1082
+%%EOF
